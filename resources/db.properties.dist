@@ -1,4 +1,4 @@
-db-name = DBNAME
-db-host = DBHOST
+db-uri = DBURI
+db-driver = DBDRIVER
 db-user = DBUSER
 db-password = DBPASSWORD
