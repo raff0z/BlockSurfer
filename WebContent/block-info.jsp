@@ -6,6 +6,8 @@
 <head>
 <% Block block = (Block) request.getAttribute("block"); %>
 <title>Blocco: <%out.print(block.getId()); %></title>
+
+<script src="lib/d3.min.js" charset="utf-8"></script>
 </head>
 <body>
 	<h1>Blocco: <%out.print(block.getId()); %></h1>
