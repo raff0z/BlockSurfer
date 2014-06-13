@@ -26,9 +26,19 @@ public class Controller extends HttpServlet {
 
 	this.comand2action.put("findblock",
 		"it.uniroma3.vi.action.FindBlockAction");
+	this.comand2action.put("jsonblock",
+		"it.uniroma3.vi.action.JsonBlockAction");
+	this.comand2action.put("findtransaction",
+		"it.uniroma3.vi.action.FindTransactionAction");
+	this.comand2action.put("jsontransaction",
+		"it.uniroma3.vi.action.JsonTransactionAction");
+	
 
 	this.output2page.put("error", "/error.jsp");
 	this.output2page.put("block-info", "/block-info.jsp");
+	this.output2page.put("block-json", "/block-json.jsp");
+	this.output2page.put("transaction-info", "/transaction-info.jsp");
+	this.output2page.put("transaction-json", "/transaction-json.jsp");
 
     }
 
