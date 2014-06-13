@@ -10,16 +10,18 @@ public class HelperTransaction {
     public String blobHashToString(Blob blob) throws SQLException, IOException {
 
 	String hash = "";
+	//TODO FIX
+	if (blob != null) {
+	    InputStream is = blob.getBinaryStream();
 
-	InputStream is = blob.getBinaryStream();
-
-	int ch;
-	while ((ch = is.read()) != -1) {
-	    String part = Integer.toHexString(ch);
-	    if (part.length() == 1)
-		hash += "0" + part;
-	    else
-		hash += part;
+	    int ch;
+	    while ((ch = is.read()) != -1) {
+		String part = Integer.toHexString(ch);
+		if (part.length() == 1)
+		    hash += "0" + part;
+		else
+		    hash += part;
+	    }
 	}
 	return hash;
     }
