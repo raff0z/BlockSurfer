@@ -6,6 +6,7 @@ import it.uniroma3.vi.persistence.exception.PersistenceException;
 import it.uniroma3.vi.persistence.jdbc.SimpleDataSourceTransactions;
 
 import java.io.IOException;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,9 +41,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 		PreparedStatement statementTwo = null;
 
-		String queryTx = "SELECT txout.txout_pos, txout.txout_scriptPubKey, txout.txout_value, nexttx.tx_hash, nexttx.tx_id, "
+		String queryTx = "SELECT txout.txout_pos, txout.txout_scriptPubKey, txout.txout_value, nexttx.tx_hash, nexttx.tx_id, pk.pubkey_hash,"
 			+ "txin.txin_pos FROM txout LEFT JOIN txin ON (txin.txout_id = txout.txout_id) LEFT JOIN tx nexttx"
-			+ " ON (txin.tx_id = nexttx.tx_id) WHERE txout.tx_id = ? ORDER BY txout.txout_pos";
+			+ " ON (txin.tx_id = nexttx.tx_id) LEFT JOIN pubkey pk on(txout.pubkey_id = pk.pubkey_id )"
+			+ " WHERE txout.tx_id = ? ORDER BY txout.txout_pos";
 
 		statementTwo = connection.prepareStatement(queryTx);
 
@@ -52,14 +54,19 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 		while (resultTwo.next()) {
 		    Transaction transactionChild = new Transaction();
-		    String hashChild = this.helperTransaction
-			    .blobHashToString(resultTwo.getBlob("tx_hash"));
-		    Integer idChild = resultTwo.getInt("tx_id");
-		    transactionChild.setIdTr(idChild);
-		    transactionChild.setHash(hashChild);
-		    childrenTransaction.add(transactionChild);
+
+		    Blob blob = resultTwo.getBlob("tx_hash");
+
+		    if (blob != null) {
+			String hashChild = this.helperTransaction
+				.blobHashToString(blob);
+			Integer idChild = resultTwo.getInt("tx_id");
+			transactionChild.setIdTr(idChild);
+			transactionChild.setHash(hashChild);
+			childrenTransaction.add(transactionChild);
+		    }
 		}
-		
+
 		transaction.setChildren(childrenTransaction);
 		transaction.setHash(hash);
 		transaction.setIdTr(id);
