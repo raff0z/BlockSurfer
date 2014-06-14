@@ -7,4 +7,4 @@ A tool to navigate bitcoin blockchain.
 #### resources -> Build path -> Use as source folder.
 
 #### Also include those libraries: EAR, Web app, Apache tomcat, c3p0 
-#### (0.9.1.1 used), mysql connector java (5.1.31 used)
+#### (0.9.1.1 used), mysql connector java (5.1.31 used), bitcoinj (0.11)
