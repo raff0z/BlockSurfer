@@ -11,8 +11,7 @@ public class HelperAddress {
 
     /**
      * give an address from an hash160 implementation of
-     * https://en.bitcoin.it/wiki
-     * /Technical_background_of_version_1_Bitcoin_addresses
+     * https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
      **/
     public String blobHashToAddressString(Blob blob, String version)
 	    throws SQLException, IOException {
