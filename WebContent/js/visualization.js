@@ -1,7 +1,5 @@
 //TEST CODE
 
-
-
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 960 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
@@ -134,12 +132,20 @@ function update(source) {
 
 // Toggle children on click.
 function click(d) {
-  if (d.children) {
-    d._children = d.children;
-    d.children = null;
-  } else {
-    d.children = d._children;
-    d._children = null;
-  }
-  update(d);
+	var json = "/BlockSurfer/jsontransaction.do?id=" + d.idTr;
+	
+	d3.json(json, function(error, transaction){
+		d._children = transaction.children;
+		console.log(d);
+
+		  if (d.children) {
+			    d._children = d.children;
+			    d.children = null;
+			  } else {
+			    d.children = d._children;
+			    d._children = null;
+			  }
+		  
+		update(d);
+	});
 }
