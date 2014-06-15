@@ -76,12 +76,13 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				//statement per prendere i genitori della transazione
 				PreparedStatement statementThree = null;
 				
-				String queryTxIn = "SELECT txin.txin_pos, txin.txin_scriptSig,txout.txout_value,prevtx.tx_id,prevtx.tx_hash, "
-					+ "COALESCE(prevtx.tx_hash, u.txout_tx_hash),COALESCE(txout.txout_pos, u.txout_pos),txout.txout_scriptPubKey"
-					+ " FROM txin LEFT JOIN txout ON (txout.txout_id = txin.txout_id) "
+				String queryTxIn = "SELECT u.txout_tx_hash, txin.txin_pos, txin.txin_scriptSig,txout.txout_value,prevtx.tx_id,"
+					+ "COALESCE(prevtx.tx_hash, u.txout_tx_hash) as tx_hash,"
+					+ "COALESCE(txout.txout_pos, u.txout_pos),txout.txout_scriptPubKey "
+					+ "FROM txin LEFT JOIN txout ON (txout.txout_id = txin.txout_id) "
 					+ "LEFT JOIN tx prevtx ON (txout.tx_id = prevtx.tx_id)"
 					+ "LEFT JOIN unlinked_txin u ON (u.txin_id = txin.txin_id) "
-					+ "WHERE txin.tx_id = ? ORDER BY txin.txin_pos;";
+					+ "WHERE txin.tx_id = ? ORDER BY txin.txin_pos";
 					
 				statementThree = connection.prepareStatement(queryTxIn);
 
@@ -91,9 +92,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				
 				while (resultThree.next()) {
 					Transaction transactionParent = new Transaction();
-
+					
+					
 					Blob blob = resultThree.getBlob("tx_hash");
-
+					
 					if (blob != null) {
 						String hashParent = this.helperTransaction
 								.blobHashToString(blob);
