@@ -12,7 +12,7 @@
 		    out.print(transaction.getIdTr());
 		%></title>
 		
-		<script src="js/d3.min.js" charset="utf-8"></script>
+		<script src="js/d3.js" charset="utf-8"></script>
 	
 	</head>
 	

@@ -10,7 +10,7 @@
 		<% Block block = (Block) request.getAttribute("block"); %>
 		<title>Blocco: <%out.print(block.getId()); %></title>
 		
-		<script src="js/d3.min.js" charset="utf-8"></script>
+		<script src="js/d3.js" charset="utf-8"></script>
 	
 	</head>
 	
