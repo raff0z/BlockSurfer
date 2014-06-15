@@ -10,6 +10,8 @@ public class Transaction {
     
     private List<Transaction> children;
     
+    private List<Transaction> parents;
+    
     public int getIdTr() {
 	return idTr;
     }
@@ -33,5 +35,13 @@ public class Transaction {
     public void setChildren(List<Transaction> children) {
         this.children = children;
     }
+
+	public List<Transaction> getParents() {
+		return parents;
+	}
+
+	public void setParents(List<Transaction> parents) {
+		this.parents = parents;
+	}
 
 }
