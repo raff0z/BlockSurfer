@@ -65,7 +65,7 @@ function update(source) {
 				return "translate(" + source.y0 + "," + source.x0 + ")";
 			}).on("click", click)
 			.on("mouseover", mouseover)
-			.on("mouseout", mouseout);;
+			.on("mouseout", mouseout);
 	
 	
 	nodeEnter.append("rect").attr("width", 10).attr("height", 10).style("fill", function(d) {
