@@ -43,7 +43,16 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				String hash = this.helperTransaction.blobHashToString(result
 						.getBlob("tx_hash"));
 				
-				transaction.setChildren(getChildren(id, connection));
+				List<Transaction> children = getChildren(id, connection);
+				
+				for (Transaction transaction2 : children) {
+				    List<Transaction> childrendOfChildren = getChildren(transaction2.getIdTr(), connection);
+				    if(!childrendOfChildren.isEmpty()){
+					transaction2.setChildren(childrendOfChildren);
+				    }
+				}
+				
+				transaction.setChildren(children);
 						
 				transaction.setParents(getParents(id, connection));
 				

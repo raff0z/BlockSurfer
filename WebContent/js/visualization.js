@@ -141,7 +141,7 @@ function update(source) {
 
 // Toggle children on click.
 function click(d) {
-
+	console.log(d);
 	function doClick(d) {
 		if (d.children) {
 			d._children = d.children;
@@ -153,11 +153,20 @@ function click(d) {
 
 		update(d);
 	};
+	
+	function collapse(d) {
+		if (d.children) {
+			d._children = d.children;
+			d._children.forEach(collapse);
+			d.children = null;
+		}
+	}
 
 	var json = "/BlockSurfer/jsontransaction.do?id=" + d.idTr;
 	if (!d.loaded) {
 		d3.json(json, function(error, transaction) {
 			d._children = transaction.children;
+			d._children.forEach(collapse);
 			d.loaded = true;
 			doClick(d);
 		});
