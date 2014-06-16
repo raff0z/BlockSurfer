@@ -1,5 +1,3 @@
-//TEST CODE
-
 var margin = {
 	top : 20,
 	right : 120,
@@ -10,7 +8,11 @@ var margin = {
 
 var i = 0, duration = 750, root;
 
-var tree = d3.layout.tree().size([ height, width ]);
+var tree = d3.layout.tree().nodeSize([ 180, 180 ]).size([ height, width ]);
+
+var depth;
+
+var nodeCount;
 
 var diagonal = d3.svg.diagonal().projection(function(d) {
 	return [ d.y, d.x ];
@@ -30,6 +32,9 @@ var svg = d3.select("body").append("svg").attr("width",
 		"translate(" + margin.left + "," + margin.top + ")");
 
 function init(idTr) {
+	depth = 1;
+	nodeCount = 0;
+	
 	var json = "/BlockSurfer/jsontransaction.do?id=" + idTr;
 	d3.json(json, function(error, transaction) {
 		transaction.idTr = idTr;
@@ -54,6 +59,13 @@ function init(idTr) {
 
 function update(source) {
 
+	//Increase the width when the depth increases
+    d3.select("svg").attr("width", ((250*depth)+180));
+    
+    //Incraese the height when nodes increases
+    d3.select("svg").attr("height", Math.max(height, 360+(nodeCount*80)));
+	tree.size([ Math.max(height, 360+(nodeCount*80)),width]);
+	
 	// Compute the new tree layout.
 	var nodes = tree.nodes(root).reverse(), links = tree.links(nodes);
 
@@ -170,12 +182,17 @@ function mouseout(d) {
 
 // Toggle children on click.
 function click(d) {
-	console.log(d);
 	function doClick(d) {
 		if (d.children) {
+			if (d.depth == depth-1){
+                --depth;
+			}
 			d._children = d.children;
 			d.children = null;
 		} else {
+			if (d.depth == depth){
+				++depth;
+			}
 			d.children = d._children;
 			d._children = null;
 		}
@@ -195,6 +212,9 @@ function click(d) {
 	if (!d.loaded) {
 		d3.json(json, function(error, transaction) {
 			d._children = transaction.children;
+			
+			nodeCount += d._children.length;
+			
 			d._children.forEach(collapse);
 			d.loaded = true;
 			doClick(d);
