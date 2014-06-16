@@ -16,6 +16,14 @@ var diagonal = d3.svg.diagonal().projection(function(d) {
 	return [ d.y, d.x ];
 });
 
+var triangleSx = [-10.0,0.0,
+                  0.0,-5.0,
+                  0.0,5.0];
+
+var triangleDx = [20.0,0.0,
+	              10.0,-5.0,
+	              10.0,5.0];
+
 var svg = d3.select("body").append("svg").attr("width",
 		width + margin.right + margin.left).attr("height",
 		height + margin.top + margin.bottom).append("g").attr("transform",
@@ -68,10 +76,14 @@ function update(source) {
 			.on("mouseout", mouseout);
 	
 	
-	nodeEnter.append("rect").attr("width", 10).attr("height", 10).style("fill", function(d) {
+	nodeEnter.append("rect").attr("y", -5).attr("width", 10).attr("height", 10).style("fill", function(d) {
 		return d._children ? "lightsteelblue" : "#fff";
 	});
-
+		
+	nodeEnter.append("polygon").attr("x", -10).attr("width", 10).attr("height", 10).attr("points", triangleSx);
+	
+	nodeEnter.append("polygon").attr("x", 10).attr("width", 10).attr("height", 10).attr("points", triangleDx);
+	
 	nodeEnter.append("text").attr("x", function(d) {
 		return d.children || d._children ? -10 : 10;
 	}).attr("dy", ".35em").attr("text-anchor", function(d) {
@@ -86,7 +98,7 @@ function update(source) {
 				return "translate(" + d.y + "," + d.x + ")";
 			});
 
-	nodeUpdate.select("rect").attr("width", 10).attr("height", 10).style("fill", function(d) {
+	nodeUpdate.select("rect").attr("y", -5).attr("width", 10).attr("height", 10).style("fill", function(d) {
 		return d._children ? "lightsteelblue" : "#fff";
 	});
 
@@ -98,7 +110,7 @@ function update(source) {
 				return "translate(" + source.y + "," + source.x + ")";
 			}).remove();
 
-	nodeExit.select("rect").attr("width", 10).attr("height", 10);
+	nodeExit.select("rect").attr("y", -5).attr("width", 10).attr("height", 10);
 
 	nodeExit.select("text").style("fill-opacity", 1e-6);
 
