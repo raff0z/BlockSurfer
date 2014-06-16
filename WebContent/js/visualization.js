@@ -64,8 +64,9 @@ function update(source) {
 			"transform", function(d) {
 				return "translate(" + source.y0 + "," + source.x0 + ")";
 			}).on("click", click);
-
-	nodeEnter.append("circle").attr("r", 1e-6).style("fill", function(d) {
+	
+	
+	nodeEnter.append("rect").attr("width", 10).attr("height", 10).style("fill", function(d) {
 		return d._children ? "lightsteelblue" : "#fff";
 	});
 
