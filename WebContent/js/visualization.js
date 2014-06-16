@@ -84,7 +84,7 @@ function update(source) {
 				return "translate(" + d.y + "," + d.x + ")";
 			});
 
-	nodeUpdate.select("circle").attr("r", 4.5).style("fill", function(d) {
+	nodeUpdate.select("rect").attr("width", 10).attr("height", 10).style("fill", function(d) {
 		return d._children ? "lightsteelblue" : "#fff";
 	});
 
@@ -96,7 +96,7 @@ function update(source) {
 				return "translate(" + source.y + "," + source.x + ")";
 			}).remove();
 
-	nodeExit.select("circle").attr("r", 1e-6);
+	nodeExit.select("rect").attr("width", 10).attr("height", 10);
 
 	nodeExit.select("text").style("fill-opacity", 1e-6);
 
