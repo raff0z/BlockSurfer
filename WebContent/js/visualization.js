@@ -63,7 +63,9 @@ function update(source) {
 	var nodeEnter = node.enter().append("g").attr("class", "node").attr(
 			"transform", function(d) {
 				return "translate(" + source.y0 + "," + source.x0 + ")";
-			}).on("click", click);
+			}).on("click", click)
+			.on("mouseover", mouseover)
+			.on("mouseout", mouseout);;
 	
 	
 	nodeEnter.append("rect").attr("width", 10).attr("height", 10).style("fill", function(d) {
@@ -138,6 +140,20 @@ function update(source) {
 		d.x0 = d.x;
 		d.y0 = d.y;
 	});
+}
+
+function mouseover(d) {
+    d3.select(this).append("text")
+        .attr("class", "hover")
+        .attr('transform', function(d){ 
+            return 'translate(5, -10)';
+        })
+        .text(d.hash);
+}
+
+//Toggle children on click.
+function mouseout(d) {
+    d3.select(this).select("text.hover").remove();
 }
 
 // Toggle children on click.
