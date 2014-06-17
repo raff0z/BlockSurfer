@@ -97,36 +97,26 @@ function addLink(source, target) {
 	
 }
 	
-var firstElement = false;
-
 function update() {
+	
+	link = link.data(force.links(), function(d) {
+		return d.source.id + "-" + d.target.id;
+	});
+	
+	link.enter().insert("line",".node").attr("class", "link").attr("marker-end", "url(#end)");
+
+	link.exit().remove();
 	
 	node = node.data(force.nodes(), function(d) {
 		return d.id;
 	});
 	
-	if(!firstElement) {
-		node.enter().append('div').attr('class', 'nodelist');
-		firstElement = true;
-	}
 	node.enter().append("g").attr("class", "node").on("mouseover", mouseover)
 			.on("mouseout", mouseout).call(force.drag).insert("circle").attr(
 					"r", 8);
 
 	node.exit().remove();
 	
-	link = link.data(force.links(), function(d) {
-		return d.source.id + "-" + d.target.id;
-	});
-	
-	link.enter().insert('div', '.nodelist');
-
-	link.enter().append("line").attr("class", "link").attr("marker-end", "url(#end)");
-
-	link.exit().remove();
-
-	
-
 	force.on("tick", tick);
 
 	force.start();
