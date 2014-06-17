@@ -10,6 +10,20 @@ var svg = d3.select("body").append("svg")
 .attr("width", width)
 .attr("height", height);
 
+//build the arrow.
+svg.append("svg:defs").selectAll("marker")
+    .data(["end"])      // Different link/path types can be defined here
+  .enter().append("svg:marker")    // This section adds in the arrows
+    .attr("id", String)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 15)
+    .attr("refY", 0)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");
+
 var links = [];
 var nodes = [];
 
@@ -83,25 +97,35 @@ function addLink(source, target) {
 	
 }
 	
+var firstElement = false;
 
 function update() {
-	link = link.data(force.links(), function(d) {
-		return d.source.id + "-" + d.target.id;
-	});
 	
-	link.enter().insert("line").attr("class", "link");
-
-	link.exit().remove();
-
 	node = node.data(force.nodes(), function(d) {
 		return d.id;
 	});
-
-	node.enter().insert("g").attr("class", "node").on("mouseover", mouseover)
+	
+	if(!firstElement) {
+		node.enter().append('div').attr('class', 'nodelist');
+		firstElement = true;
+	}
+	node.enter().append("g").attr("class", "node").on("mouseover", mouseover)
 			.on("mouseout", mouseout).call(force.drag).insert("circle").attr(
 					"r", 8);
 
 	node.exit().remove();
+	
+	link = link.data(force.links(), function(d) {
+		return d.source.id + "-" + d.target.id;
+	});
+	
+	link.enter().insert('div', '.nodelist');
+
+	link.enter().append("line").attr("class", "link").attr("marker-end", "url(#end)");
+
+	link.exit().remove();
+
+	
 
 	force.on("tick", tick);
 
