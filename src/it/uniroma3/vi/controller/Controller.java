@@ -30,6 +30,8 @@ public class Controller extends HttpServlet {
 		"it.uniroma3.vi.action.JsonBlockAction");
 	this.comand2action.put("findtransaction",
 		"it.uniroma3.vi.action.FindTransactionAction");
+	this.comand2action.put("findTransactionGraph",
+		"it.uniroma3.vi.action.FindTransactionGraphAction");
 	this.comand2action.put("jsontransaction",
 		"it.uniroma3.vi.action.JsonTransactionAction");
 	
@@ -39,6 +41,7 @@ public class Controller extends HttpServlet {
 	this.output2page.put("block-json", "/block-json.jsp");
 	this.output2page.put("transaction-info", "/transaction-info.jsp");
 	this.output2page.put("transaction-json", "/transaction-json.jsp");
+	this.output2page.put("transaction-info-graph", "/transaction-info-graph.jsp");
 
     }
 
