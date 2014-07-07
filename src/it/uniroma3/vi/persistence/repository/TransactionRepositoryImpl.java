@@ -45,19 +45,19 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				
 				List<Transaction> children = getChildren(id, connection);
 				
-				for (Transaction transaction2 : children) {
-				    List<Transaction> childrendOfChildren = getChildren(transaction2.getIdTr(), connection);
-				    if(!childrendOfChildren.isEmpty()){
-					transaction2.setChildren(childrendOfChildren);
-				    }
-				}
+//				for (Transaction transaction2 : children) {
+//				    List<Transaction> childrendOfChildren = getChildren(transaction2.getId(), connection);
+//				    if(!childrendOfChildren.isEmpty()){
+//					transaction2.setChildren(childrendOfChildren);
+//				    }
+//				}
 				
 				transaction.setChildren(children);
 						
 				transaction.setParents(getParents(id, connection));
 				
 				transaction.setHash(hash);
-				transaction.setIdTr(id);
+				transaction.setId(id);
 			}
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
@@ -114,7 +114,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 			if (blob != null) {
 				String hashChild = this.helperTransaction.blobHashToString(blob);
 				Integer idChild = result.getInt("tx_id");
-				transactionChild.setIdTr(idChild);
+				transactionChild.setId(idChild);
 				transactionChild.setHash(hashChild);
 				childrenTransaction.add(transactionChild);
 			}
@@ -160,7 +160,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				String hashParent = this.helperTransaction.blobHashToString(blob);
 				
 				Integer idParent = result.getInt("tx_id");
-				transactionParent.setIdTr(idParent);
+				transactionParent.setId(idParent);
 				transactionParent.setHash(hashParent);
 				parentsTransaction.add(transactionParent);
 			}

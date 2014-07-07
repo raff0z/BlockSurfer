@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Transaction {
 
-    private int idTr;
+    private int id;
 
     private String hash;
     
@@ -12,12 +12,12 @@ public class Transaction {
     
     private List<Transaction> parents;
     
-    public int getIdTr() {
-	return idTr;
+    public int getId() {
+	return id;
     }
 
-    public void setIdTr(int id) {
-	this.idTr = id;
+    public void setId(int id) {
+	this.id = id;
     }
 
     public String getHash() {

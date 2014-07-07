@@ -16,7 +16,7 @@ svg.append("svg:defs").selectAll("marker")
   .enter().append("svg:marker")    // This section adds in the arrows
     .attr("id", String)
     .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 15)
+    .attr("refX", 18.5)
     .attr("refY", 0)
     .attr("markerWidth", 6)
     .attr("markerHeight", 6)
@@ -63,36 +63,39 @@ function mouseout() {
       .attr("r", 8);
 }
 
-function addNode(idTr) {
-	var node =  {id: '' + idTr + ''};
-
-	Array.prototype.contains = function ( idTr ) {
+function addNode(transaction) {
+//	var transaction =  {id: '' + id + ''};
+	var id = transaction.id;
+	transaction.id = transaction.id; 
+	
+	Array.prototype.contains = function ( id ) {
 		   for (i in this) {
-		       if (this[i].id == idTr) return true;
+		       if (this[i].id == id) return true;
 		   }
 		   return false;
 	};
 	
-	if(!nodes.contains(idTr)){
-		nodes.push(node);
-		update();
+	if(!nodes.contains(transaction.id)){
+		nodes.push(transaction);
+//		update();
 	}
 }
 
 function addLink(source, target) {
 	var link = {source: source , target: target };
-
-	Array.prototype.contains = function ( source, target ) {
+	
+	//TODO OUR FUNCTION
+	Array.prototype.contains = function ( sourceTarget ) {
 		   for (i in this) {
-			   if ((this[i].source == source) && (this[i].target == target )){ 
+			   if ((this[i].source == sourceTarget[0] ) && (this[i].target == sourceTarget[1] )){
 				   return true;
 			   }
 		   }
 		   return false;
 	};
-	if(!links.contains(source, target)){
+	if(!links.contains([source, target])){
 		links.push(link);
-		update();
+//		update();
 	}
 	
 }
@@ -113,11 +116,36 @@ function update() {
 	
 	node.enter().append("g").attr("class", "node").on("mouseover", mouseover)
 			.on("mouseout", mouseout).call(force.drag).insert("circle").attr(
-					"r", 8);
+					"r", 8).on("click", click);
 
 	node.exit().remove();
 	
 	force.on("tick", tick);
 
 	force.start();
-};
+}
+
+//Toggle children on click.
+function click(node) {
+	var json = "/BlockSurfer/jsontransaction.do?id=" + node.id;
+		d3.json(json, function(error, transaction) {
+			
+			var children = transaction.children;
+			
+			for(i in children){
+				addNode(children[i]);
+				addLink(transaction, children[i]);
+			}
+			
+			update();
+		});
+}
+
+function init(id){
+	var json = "/BlockSurfer/jsontransaction.do?id=" + id ;
+	d3.json(json, function(error, transaction) {
+		addNode(transaction);
+		update();
+	});
+
+}
