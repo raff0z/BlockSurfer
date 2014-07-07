@@ -112,7 +112,11 @@ function y_coordinate(node) {
 	});
 
 	var length = same_layer.length;
-
+	
+	//Se la distanza tra i nodi nel layer é troppo stretta, estendo la height
+	if((height/length) < 40)
+		height =+ height*1.5;
+	
 	for(var i = 0; i < length; ++i) {
 
 		if(same_layer[i].id == node.id) {
@@ -333,7 +337,11 @@ function first_layerization() {
 function second_layerization() {
 
 	var max = max_layer();
-
+	
+	//Se la distanza tra i nodi sulla coordinata x é troppo stretta, estendo la width
+	if((width/max) < 170)
+		width =+ width*1.5;
+	
 	nodes.map(function(d) {
 		var x = max - d.x + 1;
 
