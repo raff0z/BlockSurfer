@@ -1,5 +1,6 @@
 package it.uniroma3.vi.model;
 
+import java.util.Date;
 import java.util.List;
 
 public class Transaction {
@@ -11,6 +12,10 @@ public class Transaction {
     private List<Transaction> children;
     
     private List<Transaction> parents;
+    
+    private Date date;
+    
+    private double amount;
     
     public int getId() {
 	return id;
@@ -42,6 +47,22 @@ public class Transaction {
 
 	public void setParents(List<Transaction> parents) {
 		this.parents = parents;
+	}
+
+	public Date getDate() {
+	    return date;
+	}
+
+	public void setDate(Date date) {
+	    this.date = date;
+	}
+
+	public double getAmount() {
+	    return amount;
+	}
+
+	public void setAmount(double amount) {
+	    this.amount = amount;
 	}
 
 }

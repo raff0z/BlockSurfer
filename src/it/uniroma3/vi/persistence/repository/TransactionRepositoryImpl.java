@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
@@ -58,6 +59,9 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				
 				transaction.setHash(hash);
 				transaction.setId(id);
+				
+				long nTime = fetchBlockTime(id, connection);
+				transaction.setDate(new Date(nTime*1000));
 			}
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
@@ -94,7 +98,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 		PreparedStatement statement = null;
 
-		String queryTxOuts = "SELECT txout.txout_pos, txout.txout_scriptPubKey, txout.txout_value, nexttx.tx_hash, nexttx.tx_id, pk.pubkey_hash,"
+		String queryTxOuts ="SELECT txout.txout_pos, txout.txout_scriptPubKey, txout.txout_value, nexttx.tx_hash, nexttx.tx_id, pk.pubkey_hash,"
 				+ "txin.txin_pos FROM txout LEFT JOIN txin ON (txin.txout_id = txout.txout_id) LEFT JOIN tx nexttx"
 				+ " ON (txin.tx_id = nexttx.tx_id) LEFT JOIN pubkey pk on(txout.pubkey_id = pk.pubkey_id )"
 				+ " WHERE txout.tx_id = ? ORDER BY txout.txout_pos";
@@ -116,6 +120,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				Integer idChild = result.getInt("tx_id");
 				transactionChild.setId(idChild);
 				transactionChild.setHash(hashChild);
+				long nTime = fetchBlockTime(id, connection);
+				transactionChild.setDate(new Date(nTime*1000));
 				childrenTransaction.add(transactionChild);
 			}
 		}
@@ -162,12 +168,35 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				Integer idParent = result.getInt("tx_id");
 				transactionParent.setId(idParent);
 				transactionParent.setHash(hashParent);
+				
+				long nTime = fetchBlockTime(id, connection);
+				transactionParent.setDate(new Date(nTime*1000));
 				parentsTransaction.add(transactionParent);
 			}
 		}
 		
 		return parentsTransaction;
 
+	}
+	
+	public void fetchAmount(){
+	    
+	}
+	
+	public int fetchBlockTime(int id, Connection connection) throws SQLException{
+	    PreparedStatement statement = null;
+
+	    String query = "SELECT * FROM block_tx as blktx join block on (blktx.block_id = block.block_id) where blktx.tx_id = ?";
+	    
+	    statement = connection.prepareStatement(query);
+
+	    statement.setInt(1, id);
+
+	    ResultSet result = statement.executeQuery();
+	    
+	    result.next();
+	    
+	    return result.getInt("block_nTime");
 	}
 
 }
