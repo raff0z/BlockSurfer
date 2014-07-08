@@ -24,9 +24,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 	private HelperTransaction helperTransaction = new HelperTransaction();
 	private HelperAddress helperAddress= new HelperAddress();
 	private float amount = 0; 
-	private Map<Integer, Float> fromAddress2Values = new HashMap<Integer, Float>();;
+	private Map<Integer, Float> fromAddress2Values = new HashMap<Integer, Float>();
 	private Map<Integer, Float> toAddress2Values = new HashMap<Integer, Float>();
-;
 	
 	/**
 	 * Get all data of a transaction from the id
