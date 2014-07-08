@@ -53,7 +53,7 @@ function init(idTr) {
 		root.children.forEach(collapse);
 		update(root);
 	});
-
+	
 	d3.select(self.frameElement).style("height", "800px");
 }
 

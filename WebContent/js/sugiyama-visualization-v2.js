@@ -1,4 +1,4 @@
-// ---------------------------------- VARS ----------------------------------
+//---------------------------------- VARS ----------------------------------
 
 var myJSON;
 
@@ -12,10 +12,14 @@ var nodes = [];
 
 var edges = [];
 
+var nodes_to_draw = [];
+
+var edges_to_draw = [];
+
 var transaction;
 
-// ---------------------------------- HELPER FUNCTIONS
-// ----------------------------------
+//---------------------------------- HELPER FUNCTIONS
+//----------------------------------
 
 function isInArray(node, arrayNodes) {
 
@@ -27,12 +31,12 @@ function isInArray(node, arrayNodes) {
 function contains(edge, arrayEdges) {
 
 	return arrayEdges
-			.some(function(element, index, array) {
-				return (element.fromNode.id == edge.fromNode.id && element.toNode.id == edge.toNode.id);
-			});
+	.some(function(element, index, array) {
+		return (element.fromNode.id == edge.fromNode.id && element.toNode.id == edge.toNode.id);
+	});
 }
 
-// funzione per verificare se un nodo é pozzo
+//funzione per verificare se un nodo é pozzo
 function isSink(node) {
 
 	var sink = true;
@@ -48,7 +52,7 @@ function isSink(node) {
 	return sink;
 }
 
-// funzione per verificare se un nodo é sorgente
+//funzione per verificare se un nodo é sorgente
 function isSource(node) {
 
 	var source = true;
@@ -64,7 +68,7 @@ function isSource(node) {
 	return source;
 }
 
-// funzione che verifica se un nodo é isolato
+//funzione che verifica se un nodo é isolato
 function isIsolated(node) {
 	return !(isSink(node) || isSource(node));
 }
@@ -99,7 +103,7 @@ function max_layer() {
 	return max;
 }
 
-// formula per il calcolo della x di ogni nodo
+//formula per il calcolo della x di ogni nodo
 function calculate_x(layer, width, maxLayer) {
 	return layer * width / maxLayer - width / (maxLayer * 2);
 }
@@ -107,16 +111,12 @@ function calculate_x(layer, width, maxLayer) {
 //funzione che calcola la coordinata y per i nodi del grafo
 function y_coordinate(node) {
 
-	var same_layer = nodes.filter(function(element) {
+	var same_layer = nodes_to_draw.filter(function(element) {
 		return element.layer == node.layer;
 	});
 
 	var length = same_layer.length;
-	
-	//Se la distanza tra i nodi nel layer é troppo stretta, estendo la height
-	if((height/length) < 40)
-		height =+ height*1.5;
-	
+
 	for(var i = 0; i < length; ++i) {
 
 		if(same_layer[i].id == node.id) {
@@ -132,7 +132,7 @@ function y_coordinate(node) {
 
 
 //funzione che rimuove l'edge dall'array edges
-function remove_from_edges(edge_to_remove) {
+function remove_from_edges(edge_to_remove, edges) {
 	var index = -1;
 	for(var i =0; i<edges.length; i++) {
 		if(edges[i].fromNode.id == edge_to_remove.fromNode.id
@@ -155,8 +155,36 @@ function find_node_by_id(id) {
 	return null;
 }
 
-// ---------------------------------- FUNCTIONS
-// ----------------------------------
+function maxNumNodesPerLayer() {
+	var map = {};
+	var max = 1;
+	nodes_to_draw.forEach(function(d) {
+		if(map[d.layer] != null) {
+			map[d.layer] += 1;
+			max = Math.max(max, map[d.layer]);
+		}
+		else {
+			map[d.layer] = 1;
+		}
+	});
+
+	return max;
+}
+
+function recalculate_height(length) {
+	if((height/length) >= 45) {
+		return;
+	}
+
+	//Se la distanza tra i nodi nel layer é troppo stretta, estendo la height
+	else {
+		height =+ height*1.5;
+		recalculate_height(length);
+	}
+}
+
+//---------------------------------- FUNCTIONS
+//----------------------------------
 
 function init(id) {
 	myJSON = "/BlockSurfer/jsontransaction.do?id=" + id;
@@ -171,23 +199,21 @@ function update() {
 	first_layerization();
 	second_layerization();
 
-//	resolve_edges();
-	
-	nodes.map(function(d){
+	resolve_edges();
+
+	recalculate_height(maxNumNodesPerLayer());
+
+	nodes_to_draw.map(function(d){
 		y_coordinate(d);
 	});
-	
-	// filtro i nodi che sono dummy
-//	nodes = nodes.filter(function(node) {
-//		return !node.isDummy;
-//	});
-	
+
+
 	d3.select("svg").remove();
-	
+
 	svg = d3.select("body").append("svg").attr("width", width).attr("height",
 			height);
-	
-	var nodesSvg = svg.selectAll(".nodes").data(nodes).enter().append("g");
+
+	var nodesSvg = svg.selectAll(".nodes").data(nodes_to_draw).enter().append("g");
 
 	nodesSvg.append("circle").attr("class", "circle").attr("r", function(d){
 		return d.isDummy ? 8.5 : 15;
@@ -205,21 +231,21 @@ function update() {
 
 	//build the arrow.
 	svg.append("svg:defs").selectAll("marker")
-	    .data(["end"])      // Different link/path types can be defined here
-	    .enter().append("svg:marker")    // This section adds in the arrows
-	    .attr("id", String)
-	    .attr("viewBox", "0 -5 10 10")
-	    .attr("refX", 20)
-	    .attr("refY", 0)
-	    .attr("markerWidth", 6)
-	    .attr("markerHeight", 6)
-	    .attr("orient", "auto")
-	    .append("svg:path")
-	    .attr("d", "M0,-5L10,0L0,5");
+	.data(["end"])      // Different link/path types can be defined here
+	.enter().append("svg:marker")    // This section adds in the arrows
+	.attr("id", String)
+	.attr("viewBox", "0 -5 10 10")
+	.attr("refX", 20)
+	.attr("refY", 0)
+	.attr("markerWidth", 6)
+	.attr("markerHeight", 6)
+	.attr("orient", "auto")
+	.append("svg:path")
+	.attr("d", "M0,-5L10,0L0,5");
 
 
 	//disegno i links
-	edges.map(function(d) {
+	edges_to_draw.map(function(d) {
 
 		if(d.isToDummy) {
 			svg.insert("line","g").attr("x1", d.fromNode.x).attr("y1", d.fromNode.y)
@@ -293,7 +319,7 @@ function loadJson(transaction) {
 	}
 }
 
-// funzione ricorsiva per il calcolo del cammino massimo di un nodo
+//funzione ricorsiva per il calcolo del cammino massimo di un nodo
 function longest_path(node) {
 
 	if (isSink(node)) {
@@ -318,7 +344,7 @@ function longest_path(node) {
 	}
 }
 
-// funzione per assegnare ai vertici il proprio layer usando longest-path
+//funzione per assegnare ai vertici il proprio layer usando longest-path
 function first_layerization() {
 
 	for (var i = 0; i < nodes.length; ++i) {
@@ -333,15 +359,15 @@ function first_layerization() {
 	}
 }
 
-// funzione che inverte i layer dei nodi e setta le coordinate degli archi
+//funzione che inverte i layer dei nodi e setta le coordinate degli archi
 function second_layerization() {
 
 	var max = max_layer();
-	
+
 	//Se la distanza tra i nodi sulla coordinata x é troppo stretta, estendo la width
-	if((width/max) < 170)
+	if((width/max) < 200)
 		width =+ width*1.5;
-	
+
 	nodes.map(function(d) {
 		var x = max - d.x + 1;
 
@@ -357,13 +383,15 @@ function second_layerization() {
 function resolve_edges() {
 
 	// copio l'array di edges
-	var copyEdges = edges.slice(0);
-	copyEdges.forEach(function(edge){
+	edges_to_draw = edges.slice(0);
+	nodes_to_draw = nodes.slice(0);
+
+	edges.forEach(function(edge){
 		var distance = edge.toNode.layer - edge.fromNode.layer;
 
 		// controllo gli archi che legano nodi a distanza di layer >1
 		if(distance >1) {
-			remove_from_edges(edge);
+			remove_from_edges(edge, edges_to_draw);
 
 			for(var i = 1; i<distance; i++) {
 
@@ -377,7 +405,7 @@ function resolve_edges() {
 				dummyNode.layer = edge.fromNode.layer+i;
 				dummyNode.x = calculate_x(dummyNode.layer, width, max_layer());
 				if(!isInArray(dummyNode, nodes))
-					nodes.push(dummyNode);
+					nodes_to_draw.push(dummyNode);
 
 				// creo l'arco che va verso il dummyNode
 				var dummyEdge = {};
@@ -402,10 +430,10 @@ function resolve_edges() {
 					finalDummyEdge.fromNode = dummyNode;
 					finalDummyEdge.toNode = edge.toNode;
 					if(!contains(finalDummyEdge, edges))
-						edges.push(finalDummyEdge);
+						edges_to_draw.push(finalDummyEdge);
 				}
 				if(!contains(dummyEdge, edges))
-					edges.push(dummyEdge);
+					edges_to_draw.push(dummyEdge);
 			}
 
 		}
@@ -424,16 +452,16 @@ function click(d){
 
 function mouseover(d) {
 	if(!d.isDummy){
-	    d3.select(this)
-	        .style("stroke", "black")
-	  		.style("stroke-width", 5);
+		d3.select(this)
+		.style("stroke", "black")
+		.style("stroke-width", 5);
 	}
 }
 
 function mouseout(d) {
 	if(!d.isDummy){
-	    d3.select(this)
-	    .style("stroke", null)
+		d3.select(this)
+		.style("stroke", null)
 		.style("stroke-width", null);
 	}
 }
