@@ -190,17 +190,17 @@ function colorByTime(id) {
 
 	var node = find_node_by_id(id);
 
-	var date = new Date(node.date);
-
 	d3.selectAll("circle").each(function(elem){
 
 		if(!elem.isDummy) {
-
-			if(date - elem.date > temporal_window) {
+			 
+			// rossi i precedenti
+			if(node.date - elem.date > temporal_window) {
 
 				d3.select(this).attr("fill", "#801515");
 
-			} else if(date - elem.date < temporal_window) {
+			// blu i successivi
+			} else if(node.date - elem.date < -temporal_window) {
 
 				d3.select(this).attr("fill", "#0D4D4D");
 			} else {
@@ -293,6 +293,8 @@ function update() {
 
 function loadJson(transaction) {
 	var node = transaction;
+	node.date = new Date(node.date);
+	
 	var parents = node.parents;
 	var children = node.children;
 
@@ -310,6 +312,7 @@ function loadJson(transaction) {
 		for (var i = 0; i < parents.length; ++i) {
 
 			var parent = parents[i];
+			parent.date = new Date(parent.date);
 
 			if (!isInArray(parent, nodes)) {
 				nodes.push(parent);
@@ -329,6 +332,7 @@ function loadJson(transaction) {
 		for (var i = 0; i < children.length; ++i) {
 
 			var child = children[i];
+			child.date = new Date(child.date);
 
 			if (!isInArray(child, nodes)) {
 				nodes.push(child);
