@@ -129,7 +129,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				transactionChild.setId(idChild);
 				transactionChild.setHash(hashChild);
 				
-				long nTime = fetchBlockTime(id, connection);
+				long nTime = fetchBlockTime(idChild, connection);
 				transactionChild.setDate(new Date(nTime*1000));
 				value = result.getFloat("txout_value");
 				value = value/100000000;
@@ -183,7 +183,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				transactionParent.setId(idParent);
 				transactionParent.setHash(hashParent);
 				
-				long nTime = fetchBlockTime(id, connection);
+				long nTime = fetchBlockTime(idParent, connection);
 				transactionParent.setDate(new Date(nTime*1000));
 				
 				value = result.getFloat("txout_value");
