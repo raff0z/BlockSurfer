@@ -240,14 +240,18 @@ function update() {
 			height);
 
 	var nodesSvg = svg.selectAll(".nodes").data(nodes_to_draw).enter().append("g");
-
+	
 	nodesSvg.append("circle").attr("class", "circle").attr("r", function(d){
 		return d.isDummy ? 8.5 : 15;
 	})
 	.attr("cx", function(d) {return d.x;})
 	.attr("cy", function(d) {return d.y;}).attr("fill", function(d){
 		return d.isDummy ? "grey" : "#354F00";
-	}).on("click", function(d){
+	}).style("stroke", function(d){
+		return d.isDummy ? null : "black";})
+	.style("stroke-width", function(d){
+		return d.isDummy ? null : 2;})
+	.on("click", function(d){
 		click(d);
 	}).on("mouseover", mouseover)
 	.on("mouseout", mouseout);
@@ -272,12 +276,12 @@ function update() {
 
 	//disegno i links
 	edges_to_draw.map(function(d) {
-
+				
 		if(d.isToDummy) {
 			svg.insert("line","g").attr("x1", d.fromNode.x).attr("y1", d.fromNode.y)
 			.attr("x2", d.toNode.x)
 			.attr("y2", d.toNode.y).attr("stroke-width", 2)
-			.attr("stroke", "black")
+			.attr("stroke", "black");
 		}
 
 		else {
@@ -493,8 +497,8 @@ function mouseover(d) {
 function mouseout(d) {
 	if(!d.isDummy){
 		d3.select(this)
-		.style("stroke", null)
-		.style("stroke-width", null);
+		.style("stroke", "black")
+		.style("stroke-width", 2);
 
 		d3.selectAll("circle").each(function(elem){
 			if(!elem.isDummy) {
