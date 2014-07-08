@@ -3,9 +3,19 @@
 
 <!DOCTYPE html>
 <html>
+<style>
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+</style>
 	<head>
 	
-		<link href="css/graph-style.css" rel="stylesheet" type="text/css">
+		<link href="css/sugiyama-style.css" rel="stylesheet" type="text/css">
 		
 		<% Transaction transaction = (Transaction) request.getAttribute("transaction"); %>
 		<title>Transazione: <%
@@ -17,6 +27,11 @@
 	</head>
 	
 	<body>
+	    <div id="tooltip" class="hidden">
+            <p><span id="txhash">hash</span></p>
+            <p><span id="value">100</span></p>
+    	</div>
+    	
 		<h1>Transazione: <%
 		    out.print(transaction.getId());
 		%></h1>

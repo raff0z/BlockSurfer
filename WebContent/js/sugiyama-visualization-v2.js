@@ -251,6 +251,7 @@ function update() {
 		click(d);
 	}).on("mouseover", mouseover)
 	.on("mouseout", mouseout);
+//	.on("contextmenu",function(d){tooltipToggle;});
 
 	nodesSvg.append("text").text(function(d) {return d.isDummy ? "" : d.id;}).attr("x",function(d){return d.x-15;})
 	.attr("y",function(d){return d.y +25;});
@@ -487,6 +488,30 @@ function mouseover(d) {
 		d3.select(this)
 		.style("stroke", "black")
 		.style("stroke-width", 5);
+
+		d3.select("#tooltip")
+		  .style("left", function(){
+			  var position = d.x - 350;
+			  if(d.x + 350 >= width)
+				  position = d.x - 700;
+			  if(position < 0)
+				  position = 0;
+			  return position + "px";
+		  })
+		  .style("top", d.y + "px");
+		
+		d3.select("#txhash")
+		.html("<p><strong>" + d.hash + "</strong></p>");
+		
+		d3.select("#value")
+		.style("font-size","11px")
+		.html("id: "+ d.id + "<br/>" +
+			  "total input: " + d.totalIn + "<br/>" +
+			  "total output: " + d.totalOut + "<br/>" +
+			  "date: " + d.date + "<br/>" 
+				);
+		
+		d3.select("#tooltip").classed("hidden", false);
 	}
 }
 
@@ -502,6 +527,8 @@ function mouseout(d) {
 			}
 
 		});
-	}
-}
+		d3.select("#tooltip").classed("hidden", true);
 
+	}
+
+}
