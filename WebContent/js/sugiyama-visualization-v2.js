@@ -493,11 +493,12 @@ function mouseover(d) {
 		.style("stroke", "black")
 		.style("stroke-width", 5);
 
+		//800 è la lunghezza della tooltip
 		d3.select("#tooltip")
 		  .style("left", function(){
-			  var position = d.x - 350;
-			  if(d.x + 350 >= width)
-				  position = d.x - 700;
+			  var position = d.x - 400;
+			  if(d.x + 400 >= width)
+				  position = d.x - 800;
 			  if(position < 0)
 				  position = 0;
 			  return position + "px";
