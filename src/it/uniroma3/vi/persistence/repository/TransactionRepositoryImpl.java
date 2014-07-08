@@ -23,9 +23,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 	private SimpleDataSourceTransactions simpleDataSourceTransactions = new SimpleDataSourceTransactions();
 	private HelperTransaction helperTransaction = new HelperTransaction();
 	private HelperAddress helperAddress= new HelperAddress();
-	private float amount = 0; 
-	private Map<Integer, Float> fromAddress2Values = new HashMap<Integer, Float>();
-	private Map<Integer, Float> toAddress2Values = new HashMap<Integer, Float>();
 	
 	/**
 	 * Get all data of a transaction from the id
@@ -48,18 +45,43 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 			if (result.next()) {
 				transaction = new Transaction();
+//				float amount = 0;
 				String hash = this.helperTransaction.blobHashToString(result
 						.getBlob("tx_hash"));
 				
 				List<Transaction> children = getChildren(id, connection);
+				List<Transaction> parents = getParents(id, connection);
 				
 				transaction.setChildren(children);
 						
-				transaction.setParents(getParents(id, connection));
+				transaction.setParents(parents);
 				
-				transaction.setAmount(this.amount);
-				transaction.setFromAddress2Values(fromAddress2Values);
-				transaction.setToAddress2Values(toAddress2Values);
+				float totalIn = getTotalIn(id, parents);
+				
+				float totalOut = getTotalOut(id, children);
+				
+				transaction.setTotalIn(totalIn);
+				transaction.setTotalOut(totalOut);
+				
+				for (Transaction parent : parents) {
+				    float totalInParent = 0;
+				    float totalOutParent = 0;
+				    int parentId = parent.getId();
+				    totalInParent = getTotalIn(parentId, getParents(parentId, connection));
+				    totalOutParent = getTotalOut(parentId, getChildren(parentId, connection));
+				    parent.setTotalIn(totalInParent);
+				    parent.setTotalOut(totalOutParent);
+				}
+				
+				for (Transaction child : children) {
+				    float totalInChild = 0;
+				    float totalOutChild = 0;
+				    int childId = child.getId();
+				    totalInChild = getTotalIn(childId, getParents(childId, connection));
+				    totalOutChild = getTotalOut(childId, getChildren(childId, connection));
+				    child.setTotalIn(totalInChild);
+				    child.setTotalOut(totalOutChild);
+				}
 				
 				transaction.setHash(hash);
 				transaction.setId(id);
@@ -78,6 +100,29 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 		}
 		return transaction;
+	}
+
+	private float getTotalOut(int id,
+		List<Transaction> children){
+	    float totalOut = 0;
+	    
+	    for (Transaction child : children) {
+	        totalOut += child.getFromAddress2Values().get(id);
+	    }
+	    
+	    return totalOut;
+	}
+	
+	private float getTotalIn(int id,
+		List<Transaction> parents) {
+	    
+	    float totalIn = 0;
+	    
+	    for (Transaction parent : parents) {
+	        totalIn += parent.getToAddress2Values().get(id);
+	    }
+	    
+	    return totalIn;
 	}
 
 	private void close(Connection connection, PreparedStatement statement)
@@ -123,6 +168,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 			if (blob != null) {
 			    	Float value;
+			    	Map<Integer, Float> fromAddress2Values = new HashMap<Integer, Float>();
 				String hashChild = this.helperTransaction.blobHashToString(blob);
 				Integer idChild = result.getInt("tx_id");
 				transactionChild.setId(idChild);
@@ -132,8 +178,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				transactionChild.setDate(new Date(nTime*1000));
 				value = result.getFloat("txout_value");
 				value = value/100000000;
-				amount += value;
-				toAddress2Values.put(idChild, value);
+//				amount += value;
+//				toAddress2Values.put(idChild, value);
+				fromAddress2Values.put(id, value);
+				transactionChild.setFromAddress2Values(fromAddress2Values);
 				childrenTransaction.add(transactionChild);
 			}
 		}
@@ -176,6 +224,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 			
 			if (blob != null) {
 			    	Float value;
+			    	Map<Integer, Float> toAddress2Values = new HashMap<Integer, Float>();
 				String hashParent = this.helperTransaction.blobHashToString(blob);
 				
 				Integer idParent = result.getInt("tx_id");
@@ -187,8 +236,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				
 				value = result.getFloat("txout_value");
 				value = value/100000000;
-				amount += value;
-				fromAddress2Values.put(idParent, value);
+//				amount += value;
+//				fromAddress2Values.put(idParent, value);
+				toAddress2Values.put(id, value);
+				transactionParent.setToAddress2Values(toAddress2Values);
 				
 				parentsTransaction.add(transactionParent);
 			}

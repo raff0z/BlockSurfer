@@ -10,7 +10,8 @@ public class Transaction {
     private List<Transaction> children;
     private List<Transaction> parents;
     private Date date;
-    private double amount;
+    private double totalIn;
+    private double totalOut;
     private List<String> toAddress;
     private List<String> fromAddress;
     private boolean notYetRedeemed;
@@ -57,14 +58,6 @@ public class Transaction {
 	this.date = date;
     }
 
-    public double getAmount() {
-	return amount;
-    }
-
-    public void setAmount(double amount) {
-	this.amount = amount;
-    }
-
     public boolean isNotYetRedeemed() {
 	return notYetRedeemed;
     }
@@ -103,6 +96,22 @@ public class Transaction {
 
     public void setToAddress2Values(Map<Integer, Float> toAddress2Values) {
         this.toAddress2Values = toAddress2Values;
+    }
+
+    public double getTotalIn() {
+        return totalIn;
+    }
+
+    public void setTotalIn(double totalIn) {
+        this.totalIn = totalIn;
+    }
+
+    public double getTotalOut() {
+        return totalOut;
+    }
+
+    public void setTotalOut(double totalOut) {
+        this.totalOut = totalOut;
     }
 
 }
