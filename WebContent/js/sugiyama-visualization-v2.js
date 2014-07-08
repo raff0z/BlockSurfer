@@ -18,6 +18,9 @@ var edges_to_draw = [];
 
 var transaction;
 
+//Finestra temporale di 5 secondi
+var temporal_window = 5000;
+
 //---------------------------------- HELPER FUNCTIONS
 //----------------------------------
 
@@ -183,6 +186,54 @@ function recalculate_height(length) {
 	}
 }
 
+function colorByTime(id) {
+	
+	var node = find_node_by_id(id);
+	
+	var date = new Date(node.date);
+	
+//	nodes.forEach(function(d) {
+//		
+//		var idD = d.id;
+//		
+//		var dateD = new Date(d.date);
+//		
+//		if(date - dateD > temporal_window) {
+//			
+//			d3.selectAll("g").each(function(elem){
+//			
+//				if(elem.id == idD) {
+//					
+//					d3.select(this).attr("fill", "blue");
+//				}
+//			});
+//	
+//		} else if (date - dateD < temporal_window){
+//			
+//			d3.selectAll("g").each(function(elem){
+//				
+//				if(elem.id == idD) {
+//					
+//					d3.select(this).attr("fill", "red");
+//				}
+//			});
+//		}
+//	});
+	
+	d3.selectAll("circle").each(function(elem){
+		
+		if(date - elem.date > temporal_window) {
+			
+			d3.select(this).attr("fill", "#801515");
+		
+		} else if(date - elem.date < temporal_window) {
+			
+			d3.select(this).attr("fill", "#0D4D4D");
+		} else {
+			d3.select(this).attr("fill", "#7B9F35");
+		}
+	});
+}
 //---------------------------------- FUNCTIONS
 //----------------------------------
 
@@ -220,7 +271,7 @@ function update() {
 	})
 	.attr("cx", function(d) {return d.x;})
 	.attr("cy", function(d) {return d.y;}).attr("fill", function(d){
-		return d.isDummy ? "grey" : "green";
+		return d.isDummy ? "grey" : "#354F00";
 	}).on("click", function(d){
 		click(d);
 	}).on("mouseover", mouseover)
@@ -452,6 +503,8 @@ function click(d){
 
 function mouseover(d) {
 	if(!d.isDummy){
+		colorByTime(d.id);
+		
 		d3.select(this)
 		.style("stroke", "black")
 		.style("stroke-width", 5);
@@ -463,6 +516,12 @@ function mouseout(d) {
 		d3.select(this)
 		.style("stroke", null)
 		.style("stroke-width", null);
+		
+		d3.selectAll("circle").each(function(elem){
+				
+			d3.select(this).attr("fill", "#354F00");
+			
+		});
 	}
 }
 
