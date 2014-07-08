@@ -1,5 +1,6 @@
 package it.uniroma3.vi.persistence.repository;
 
+import it.uniroma3.vi.helper.HelperAddress;
 import it.uniroma3.vi.helper.HelperTransaction;
 import it.uniroma3.vi.model.Transaction;
 import it.uniroma3.vi.persistence.exception.PersistenceException;
@@ -13,13 +14,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
 
 	private SimpleDataSourceTransactions simpleDataSourceTransactions = new SimpleDataSourceTransactions();
 	private HelperTransaction helperTransaction = new HelperTransaction();
-
+	private HelperAddress helperAddress= new HelperAddress();
+	private float amount = 0; 
+	private Map<Integer, Float> fromAddress2Values = new HashMap<Integer, Float>();;
+	private Map<Integer, Float> toAddress2Values = new HashMap<Integer, Float>();
+;
+	
 	/**
 	 * Get all data of a transaction from the id
 	 * @param id = the id of the transaction
@@ -46,22 +54,22 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				
 				List<Transaction> children = getChildren(id, connection);
 				
-//				for (Transaction transaction2 : children) {
-//				    List<Transaction> childrendOfChildren = getChildren(transaction2.getId(), connection);
-//				    if(!childrendOfChildren.isEmpty()){
-//					transaction2.setChildren(childrendOfChildren);
-//				    }
-//				}
-				
 				transaction.setChildren(children);
 						
 				transaction.setParents(getParents(id, connection));
+				
+				transaction.setAmount(this.amount);
+				transaction.setFromAddress2Values(fromAddress2Values);
+				transaction.setToAddress2Values(toAddress2Values);
 				
 				transaction.setHash(hash);
 				transaction.setId(id);
 				
 				long nTime = fetchBlockTime(id, connection);
 				transaction.setDate(new Date(nTime*1000));
+				
+				transaction.setFromAddress(fetchFromAddress(id, connection));
+				transaction.setToAddress(fetchToAddress(id, connection));
 			}
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
@@ -95,7 +103,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 	 */
 	private List<Transaction> getChildren(int id, Connection connection) throws SQLException, IOException{
 		List<Transaction> childrenTransaction = new ArrayList<Transaction>();
-
 		PreparedStatement statement = null;
 
 		String queryTxOuts ="SELECT txout.txout_pos, txout.txout_scriptPubKey, txout.txout_value, nexttx.tx_hash, nexttx.tx_id, pk.pubkey_hash,"
@@ -116,12 +123,18 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 			Blob blob = result.getBlob("tx_hash");
 
 			if (blob != null) {
+			    	Float value;
 				String hashChild = this.helperTransaction.blobHashToString(blob);
 				Integer idChild = result.getInt("tx_id");
 				transactionChild.setId(idChild);
 				transactionChild.setHash(hashChild);
+				
 				long nTime = fetchBlockTime(id, connection);
 				transactionChild.setDate(new Date(nTime*1000));
+				value = result.getFloat("txout_value");
+				value = value/100000000;
+				amount += value;
+				toAddress2Values.put(idChild, value);
 				childrenTransaction.add(transactionChild);
 			}
 		}
@@ -163,6 +176,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 			Blob blob = result.getBlob("tx_hash");
 			
 			if (blob != null) {
+			    	Float value;
 				String hashParent = this.helperTransaction.blobHashToString(blob);
 				
 				Integer idParent = result.getInt("tx_id");
@@ -171,6 +185,12 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				
 				long nTime = fetchBlockTime(id, connection);
 				transactionParent.setDate(new Date(nTime*1000));
+				
+				value = result.getFloat("txout_value");
+				value = value/100000000;
+				amount += value;
+				fromAddress2Values.put(idParent, value);
+				
 				parentsTransaction.add(transactionParent);
 			}
 		}
@@ -179,8 +199,53 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 	}
 	
-	public void fetchAmount(){
+	public List<String> fetchFromAddress(int id, Connection connection) throws SQLException, IOException{
+	    List<String> fromAddress = new ArrayList<String>();
+	    PreparedStatement statement = null;
+
+	    String query = "SELECT pubkey_hash FROM txin LEFT JOIN txout ON "
+	    	+ "(txout.txout_id = txin.txout_id) LEFT JOIN tx prevtx ON "
+	    	+ "(txout.tx_id = prevtx.tx_id) LEFT JOIN unlinked_txin u ON "
+	    	+ "(u.txin_id = txin.txin_id) LEFT JOIN pubkey pk ON "
+	    	+ "(txout.pubkey_id = pk.pubkey_id) "
+	    	+ "WHERE txin.tx_id = ? ORDER BY txin.txin_pos";
 	    
+	    statement = connection.prepareStatement(query);
+
+	    statement.setInt(1, id);
+
+	    ResultSet result = statement.executeQuery();
+	    
+	    while (result.next()) {	    
+		Blob blob = result.getBlob("pubkey_hash");
+		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
+		fromAddress.add(hashAddress);
+	    }
+	    return fromAddress;
+	}
+	
+	public List<String> fetchToAddress(int id, Connection connection) throws SQLException, IOException{
+	    List<String> toAddress = new ArrayList<String>();
+	    PreparedStatement statement = null;
+
+	    String query = "SELECT pubkey_hash FROM txout LEFT JOIN txin ON "
+	    	+ "(txin.txout_id = txout.txout_id) "
+	    	+ "LEFT JOIN tx nexttx ON (txin.tx_id = nexttx.tx_id) "
+	    	+ "LEFT JOIN pubkey pk on(txout.pubkey_id = pk.pubkey_id ) "
+	    	+ "WHERE txout.tx_id = ? ORDER BY txout.txout_pos";
+	    
+	    statement = connection.prepareStatement(query);
+
+	    statement.setInt(1, id);
+
+	    ResultSet result = statement.executeQuery();
+	    
+	    while (result.next()) {	    
+		Blob blob = result.getBlob("pubkey_hash");
+		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
+		toAddress.add(hashAddress);
+	    }
+	    return toAddress;
 	}
 	
 	public int fetchBlockTime(int id, Connection connection) throws SQLException{
