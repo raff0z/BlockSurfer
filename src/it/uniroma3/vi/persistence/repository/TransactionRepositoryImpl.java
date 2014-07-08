@@ -218,8 +218,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 	    
 	    while (result.next()) {	    
 		Blob blob = result.getBlob("pubkey_hash");
-		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
-		fromAddress.add(hashAddress);
+		if (blob != null){
+        		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
+        		fromAddress.add(hashAddress);
+		}
 	    }
 	    return fromAddress;
 	}
@@ -242,8 +244,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 	    
 	    while (result.next()) {	    
 		Blob blob = result.getBlob("pubkey_hash");
-		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
-		toAddress.add(hashAddress);
+		if (blob != null){
+        		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
+        		toAddress.add(hashAddress);
+		}
 	    }
 	    return toAddress;
 	}
