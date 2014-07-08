@@ -197,14 +197,14 @@ function colorByTime(id) {
 			// rossi i precedenti
 			if(node.date - elem.date > temporal_window) {
 
-				d3.select(this).attr("fill", "#801515");
+				d3.select(this).attr("fill", "#FF0000");
 
 			// blu i successivi
 			} else if(node.date - elem.date < -temporal_window) {
 
-				d3.select(this).attr("fill", "#0D4D4D");
+				d3.select(this).attr("fill", "#009999");
 			} else {
-				d3.select(this).attr("fill", "#7B9F35");
+				d3.select(this).attr("fill", "#9FEE00");
 			}
 		}
 	});
