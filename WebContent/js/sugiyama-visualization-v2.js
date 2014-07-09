@@ -209,6 +209,17 @@ function colorByTime(id) {
 		}
 	});
 }
+
+function amount2radius(amount) {
+	
+	if(amount<=0) {
+		return 10;
+	} else if (amount >= 1200){
+		return 20; 
+	} else {
+		return (amount/120) + 10;
+	}
+}
 //---------------------------------- FUNCTIONS
 //----------------------------------
 
@@ -242,7 +253,7 @@ function update() {
 	var nodesSvg = svg.selectAll(".nodes").data(nodes_to_draw).enter().append("g");
 	
 	nodesSvg.append("circle").attr("class", "circle").attr("r", function(d){
-		return d.isDummy ? 8.5 : 15;
+		return d.isDummy ? 8.5 : amount2radius(d.totalIn);
 	})
 	.attr("cx", function(d) {return d.x;})
 	.attr("cy", function(d) {return d.y;}).attr("fill", function(d){
@@ -258,7 +269,7 @@ function update() {
 //	.on("contextmenu",function(d){tooltipToggle;});
 
 	nodesSvg.append("text").text(function(d) {return d.isDummy ? "" : d.id;}).attr("x",function(d){return d.x-15;})
-	.attr("y",function(d){return d.y +25;});
+	.attr("y",function(d){return d.y +amount2radius(d.totalIn) + 11;});
 
 	//build the arrow.
 	svg.append("svg:defs").selectAll("marker")
