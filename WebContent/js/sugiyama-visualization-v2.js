@@ -175,7 +175,7 @@ function maxNumNodesPerLayer() {
 }
 
 function recalculate_height(length) {
-	if((height/length) >= 45) {
+	if((height/length) >= 50) {
 		return;
 	}
 
@@ -193,13 +193,13 @@ function colorByTime(id) {
 	d3.selectAll("circle").each(function(elem){
 
 		if(!elem.isDummy) {
-			 
+
 			// rossi i precedenti
 			if(node.date - elem.date > temporal_window) {
 
 				d3.select(this).attr("fill", "#FF0000");
 
-			// blu i successivi
+				// blu i successivi
 			} else if(node.date - elem.date < -temporal_window) {
 
 				d3.select(this).attr("fill", "#009999");
@@ -211,15 +211,36 @@ function colorByTime(id) {
 }
 
 function amount2radius(amount) {
-	
+
 	if(amount<=0) {
 		return 10;
-	} else if (amount >= 1200){
+	} else if (amount >= 10){
 		return 20; 
 	} else {
-		return (amount/120) + 10;
+		return (amount) + 10;
 	}
 }
+
+
+//build the arrow.
+function build_arrow(edge) {
+	svg.append("svg:defs").selectAll("marker")
+	.data(["end"])      // Different link/path types can be defined here
+	.enter().append("svg:marker")    // This section adds in the arrows
+	.attr("id", String)
+	.attr("viewBox", "0 -5 10 10")
+	.attr("refX", 20+amount2radius(edge.toNode.totalIn))
+	.attr("refY", 0)
+	.attr("markerWidth", 6)
+	.attr("markerHeight", 6)
+	.attr("orient", "auto")
+	.append("svg:path")
+	.attr("d", "M0,-5L10,0L0,5");
+	
+	return "url(#end)";
+}
+
+
 //---------------------------------- FUNCTIONS
 //----------------------------------
 
@@ -251,7 +272,7 @@ function update() {
 			height);
 
 	var nodesSvg = svg.selectAll(".nodes").data(nodes_to_draw).enter().append("g");
-	
+
 	nodesSvg.append("circle").attr("class", "circle").attr("r", function(d){
 		return d.isDummy ? 8.5 : amount2radius(d.totalIn);
 	})
@@ -260,18 +281,18 @@ function update() {
 		return (d.isDummy || d.notYetRedeemed) ? "grey" : "#354F00";
 	}).style("stroke", function(d){
 		return d.isDummy ? null : "black";})
-	.style("stroke-width", function(d){
-		return d.isDummy ? null : 2;})
-	.on("click", function(d){
-		click(d);
-	}).on("mouseover", mouseover)
-	.on("mouseout", mouseout);
+		.style("stroke-width", function(d){
+			return d.isDummy ? null : 2;})
+			.on("click", function(d){
+				click(d);
+			}).on("mouseover", mouseover)
+			.on("mouseout", mouseout);
 //	.on("contextmenu",function(d){tooltipToggle;});
 
 	nodesSvg.append("text").text(function(d) {return d.isDummy ? "" : d.id;}).attr("x",function(d){return d.x-15;})
-	.attr("y",function(d){return d.y +amount2radius(d.totalIn) + 11;});
+	.attr("y",function(d){return d.isDummy ? null : d.y +amount2radius(d.totalIn) + 11;});
 
-	//build the arrow.
+	
 	svg.append("svg:defs").selectAll("marker")
 	.data(["end"])      // Different link/path types can be defined here
 	.enter().append("svg:marker")    // This section adds in the arrows
@@ -288,7 +309,7 @@ function update() {
 
 	//disegno i links
 	edges_to_draw.map(function(d) {
-				
+
 		if(d.isToDummy) {
 			svg.insert("line","g").attr("x1", d.fromNode.x).attr("y1", d.fromNode.y)
 			.attr("x2", d.toNode.x)
@@ -310,7 +331,7 @@ function update() {
 function loadJson(transaction) {
 	var node = transaction;
 	node.date = new Date(node.date);
-	
+
 	var parents = node.parents;
 	var children = node.children;
 
@@ -506,27 +527,27 @@ function mouseover(d) {
 
 		//800 è la lunghezza della tooltip
 		d3.select("#tooltip")
-		  .style("left", function(){
-			  var position = d.x - 400;
-			  if(d.x + 400 >= width)
-				  position = d.x - 800;
-			  if(position < 0)
-				  position = 0;
-			  return position + "px";
-		  })
-		  .style("top", d.y + "px");
-		
+		.style("left", function(){
+			var position = d.x - 400;
+			if(d.x + 400 >= width)
+				position = d.x - 800;
+			if(position < 0)
+				position = 0;
+			return position + "px";
+		})
+		.style("top", d.y + "px");
+
 		d3.select("#txhash")
 		.html("<p><strong>" + d.hash + "</strong></p>");
-		
+
 		d3.select("#value")
 		.style("font-size","11px")
 		.html("id: "+ d.id + "<br/>" +
-			  "total input: " + d.totalIn + "<br/>" +
-			  "total output: " + d.totalOut + "<br/>" +
-			  "date: " + d.date + "<br/>" 
-				);
-		
+				"total input: " + d.totalIn + "<br/>" +
+				"total output: " + d.totalOut + "<br/>" +
+				"date: " + d.date + "<br/>" 
+		);
+
 		d3.select("#tooltip").classed("hidden", false);
 	}
 }
