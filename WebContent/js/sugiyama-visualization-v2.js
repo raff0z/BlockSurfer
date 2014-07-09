@@ -246,7 +246,7 @@ function update() {
 	})
 	.attr("cx", function(d) {return d.x;})
 	.attr("cy", function(d) {return d.y;}).attr("fill", function(d){
-		return d.isDummy ? "grey" : "#354F00";
+		return (d.isDummy || d.notYetRedeemed) ? "grey" : "#354F00";
 	}).style("stroke", function(d){
 		return d.isDummy ? null : "black";})
 	.style("stroke-width", function(d){
@@ -528,7 +528,11 @@ function mouseout(d) {
 
 		d3.selectAll("circle").each(function(elem){
 			if(!elem.isDummy) {
-				d3.select(this).attr("fill", "#354F00");
+				if(!elem.notYetRedeemed) {
+					d3.select(this).attr("fill", "#354F00");
+				} else {
+					d3.select(this).attr("fill", "grey");
+				}
 			}
 
 		});
