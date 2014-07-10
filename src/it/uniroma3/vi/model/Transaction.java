@@ -14,7 +14,7 @@ public class Transaction {
     private double totalOut;
     private List<String> toAddress;
     private List<String> fromAddress;
-    private boolean notYetRedeemed;
+    private boolean notYetRedeemed = false;
     private Map<Integer, Float> fromAddress2Values;
     private Map<Integer, Float> toAddress2Values;
     

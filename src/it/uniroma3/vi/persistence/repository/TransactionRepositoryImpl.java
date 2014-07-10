@@ -184,6 +184,16 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 				transactionChild.setFromAddress2Values(fromAddress2Values);
 				childrenTransaction.add(transactionChild);
 			}
+			else{
+			    	Float value;
+			    	Map<Integer, Float> fromAddress2Values = new HashMap<Integer, Float>();
+				value = result.getFloat("txout_value");
+				value = value/100000000;
+				fromAddress2Values.put(id, value);
+				transactionChild.setFromAddress2Values(fromAddress2Values);
+				transactionChild.setNotYetRedeemed(true);
+				childrenTransaction.add(transactionChild);
+			}
 		}
 		return childrenTransaction;
 	}

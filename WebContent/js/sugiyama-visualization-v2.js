@@ -192,7 +192,7 @@ function colorByTime(id) {
 
 	d3.selectAll("circle").each(function(elem){
 
-		if(!elem.isDummy) {
+		if(!elem.isDummy && !elem.notYetRedeemed) {
 
 			// rossi i precedenti
 			if(node.date - elem.date > temporal_window) {
@@ -287,9 +287,8 @@ function update() {
 				click(d);
 			}).on("mouseover", mouseover)
 			.on("mouseout", mouseout);
-//	.on("contextmenu",function(d){tooltipToggle;});
 
-	nodesSvg.append("text").text(function(d) {return d.isDummy ? "" : d.id;}).attr("x",function(d){return d.x-15;})
+	nodesSvg.append("text").text(function(d) {return d.isDummy ? "" : d.notYetRedeemed ? "Not yet redeemed" : d.id;}).attr("x",function(d){return d.x-15;})
 	.attr("y",function(d){return d.isDummy ? null : d.y +amount2radius(d.totalIn) + 11;});
 
 	
@@ -518,7 +517,7 @@ function click(d){
 }
 
 function mouseover(d) {
-	if(!d.isDummy){
+	if(!d.isDummy && !d.notYetRedeemed){
 		colorByTime(d.id);
 
 		d3.select(this)
