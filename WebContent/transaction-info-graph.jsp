@@ -17,18 +17,17 @@
 	</head>
 	
 	<body>
-		<h1>Transazione: <%
-		    out.print(transaction.getId());
-		%></h1>
-		<p>
-			Hash: <%
-		    out.print(transaction.getHash());
-		%>
-		</p>
+		<div id="tooltip" class="hidden">
+            <p><span id="txhash">hash</span></p>
+            <p><span id="value">100</span></p>
+    	</div>
 		
-		<script src="js/graph-visualization.js"></script>
-		<script type="text/javascript">
-			init(<%out.print(transaction.getId());%>);
-		</script>
+		<div class="svg">
+		  	<span id="revert"><button onclick="revert()">Revert</button></span>
+			<script src="js/graph-visualization-v2.js"></script>
+			<script type="text/javascript">
+				init(<%out.print(transaction.getId());%>);
+			</script>
+		</div>
 	</body>
 </html>
