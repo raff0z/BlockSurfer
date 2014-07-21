@@ -6,7 +6,10 @@ var width = 960;
 var height = 500;
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height);
+		height).call(d3.behavior.zoom().on("zoom", zoomed));
+
+svg = svg
+.append('g');
 
 var nodes = [];
 
@@ -30,6 +33,7 @@ var force = d3.layout.force()
 .linkDistance(120)
 .charge(-300);
 
+var idNYR = -1;
 
 //------------------------------- HELPER FUNCTIONS --------------------------
 
@@ -176,7 +180,8 @@ function update() {
 	var state = {};
 	state.nodes = nodes.slice(0);
 	state.edges = edges.slice(0);
-
+	state.nodeId = transaction.id; 
+		
 	historyGraph.push(state);
 	
 	loadJson(transaction);
@@ -189,7 +194,10 @@ function draw(revert) {
 		d3.select("svg").remove();
 	
 		svg = d3.select("body").append("svg").attr("width", width).attr("height",
-				height);
+				height).call(d3.behavior.zoom().on("zoom", zoomed));
+		
+		svg = svg
+		.append('g');
 		
 		force = d3.layout.force()
 		.nodes(nodes)
@@ -298,6 +306,11 @@ function loadJson(transaction) {
 
 			var child = children[i];
 			child.date = new Date(child.date);
+			
+			if(child.notYetRedeemed){
+				child.id = idNYR;
+				idNYR--;
+			}
 
 			if (!isInArray(child, nodes)) {
 				nodes.push(child);
@@ -315,7 +328,8 @@ function loadJson(transaction) {
 }
 
 function click(d){
-	if(!d.isDummy){
+	if(!d.isDummy && !d.isClicked){
+		d.isClicked = true;
 		var json = "/BlockSurfer/jsontransaction.do?id=" + d.id;
 		d3.json(json, function(error, element) {
 			transaction = element;
@@ -410,6 +424,15 @@ function revert(){
 		nodes = state.nodes.slice(0);
 		edges = state.edges.slice(0);
 		
+		var nodeClicked = find_node_by_id(state.nodeId);
+		nodeClicked.isClicked = false;
+		
 		draw(true);
 	}
+}
+
+function zoomed() {
+    svg.attr("transform",
+             "translate(" + d3.event.translate + ")"
+             + " scale(" + d3.event.scale + ")");
 }
