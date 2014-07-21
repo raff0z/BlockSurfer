@@ -6,7 +6,7 @@ var width = 960;
 var height = 500;
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height).call(d3.behavior.zoom().on("zoom", zoomed));
+		height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);
 
 svg = svg
 .append('g');
@@ -34,6 +34,11 @@ var force = d3.layout.force()
 .charge(-300);
 
 var idNYR = -1;
+
+var drag = d3.behavior.drag()
+.on("dragstart", dragstart)
+.on("drag", dragmove)
+.on("dragend", dragend);
 
 //------------------------------- HELPER FUNCTIONS --------------------------
 
@@ -194,7 +199,7 @@ function draw(revert) {
 		d3.select("svg").remove();
 	
 		svg = d3.select("body").append("svg").attr("width", width).attr("height",
-				height).call(d3.behavior.zoom().on("zoom", zoomed));
+				height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);
 		
 		svg = svg
 		.append('g');
@@ -228,7 +233,7 @@ function draw(revert) {
 	.append("g").attr("class", "node")
 	.on("mouseover",mouseover)
 	.on("mouseout", mouseout)
-	.call(force.drag)
+	.call(drag)
 	.insert("circle")
 	.attr("r", function(d) {
 		return amount2radius(d.totalIn);
@@ -238,7 +243,7 @@ function draw(revert) {
 		return "black";
 	}).style("stroke-width", function(d) {
 		return 2;
-	}).on("click", function(d) {
+	}).on("dblclick", function(d) {
 		click(d);
 	});
 
@@ -435,4 +440,22 @@ function zoomed() {
     svg.attr("transform",
              "translate(" + d3.event.translate + ")"
              + " scale(" + d3.event.scale + ")");
+}
+
+function dragstart(d, i) {
+	d3.event.sourceEvent.stopPropagation();
+    force.stop();// stops the force auto positioning before you start dragging
+}
+
+function dragmove(d, i) {
+	d.px += d3.event.dx;
+    d.py += d3.event.dy;
+    d.x += d3.event.dx;
+    d.y += d3.event.dy; 
+    tick(); // this is the key to make it work together with updating both px,py,x,y on d !
+}
+
+function dragend(d, i) {
+    tick();
+    force.resume();
 }
