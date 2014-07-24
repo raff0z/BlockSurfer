@@ -5,12 +5,12 @@ var iterator_number = 200;
 
 var elastic_factor = 7;
 var spring_length = 100;
-var electric_factor = 10;
+var electric_factor = 7;
 var forces_factor = 0.5;
 
 var alpha = 0.1;
-var beta = 2;
-var magnetic_factor = 15;
+var beta = 0.7;
+var magnetic_factor = 10;
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
 		height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);
@@ -763,7 +763,7 @@ function fit_graph() {
 	nodes.forEach(function(d) {
 		d.x -= min_x - 25;
 		
-		d.y -= min_y - 25;
+		d.y -= min_y - 35;
 	});
 	
 	
