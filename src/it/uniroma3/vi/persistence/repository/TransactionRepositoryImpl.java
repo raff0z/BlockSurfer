@@ -259,11 +259,11 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
 	}
 	
-	public List<String> fetchFromAddress(int id, Connection connection) throws SQLException, IOException{
-	    List<String> fromAddress = new ArrayList<String>();
+	public Map<Integer,String> fetchFromAddress(int id, Connection connection) throws SQLException, IOException{
+	    Map<Integer,String> prevsId2fromAddress = new HashMap<Integer, String>();
 	    PreparedStatement statement = null;
 
-	    String query = "SELECT pubkey_hash FROM txin LEFT JOIN txout ON "
+	    String query = "SELECT pubkey_hash, prevtx.tx_id  FROM txin LEFT JOIN txout ON "
 	    	+ "(txout.txout_id = txin.txout_id) LEFT JOIN tx prevtx ON "
 	    	+ "(txout.tx_id = prevtx.tx_id) LEFT JOIN unlinked_txin u ON "
 	    	+ "(u.txin_id = txin.txin_id) LEFT JOIN pubkey pk ON "
@@ -280,17 +280,21 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 		Blob blob = result.getBlob("pubkey_hash");
 		if (blob != null){
         		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
-        		fromAddress.add(hashAddress);
+//        		fromAddress.add(hashAddress);
+        		Integer idPrev = result.getInt("tx_id");
+        		prevsId2fromAddress.put(idPrev, hashAddress);
 		}
+		
 	    }
-	    return fromAddress;
+	    return prevsId2fromAddress;
 	}
 	
-	public List<String> fetchToAddress(int id, Connection connection) throws SQLException, IOException{
-	    List<String> toAddress = new ArrayList<String>();
+	public Map<Integer,String> fetchToAddress(int id, Connection connection) throws SQLException, IOException{
+	    Map<Integer,String> prevsId2fromAddress = new HashMap<Integer, String>();
+//	    List<String> toAddress = new ArrayList<String>();
 	    PreparedStatement statement = null;
 
-	    String query = "SELECT pubkey_hash FROM txout LEFT JOIN txin ON "
+	    String query = "SELECT pubkey_hash, nexttx.tx_id FROM txout LEFT JOIN txin ON "
 	    	+ "(txin.txout_id = txout.txout_id) "
 	    	+ "LEFT JOIN tx nexttx ON (txin.tx_id = nexttx.tx_id) "
 	    	+ "LEFT JOIN pubkey pk on(txout.pubkey_id = pk.pubkey_id ) "
@@ -306,10 +310,12 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 		Blob blob = result.getBlob("pubkey_hash");
 		if (blob != null){
         		String hashAddress = this.helperAddress.blobHashToAddressString(blob, "00");
-        		toAddress.add(hashAddress);
+//        		toAddress.add(hashAddress);
+        		Integer idPrev = result.getInt("tx_id");
+        		prevsId2fromAddress.put(idPrev, hashAddress);
 		}
 	    }
-	    return toAddress;
+	    return prevsId2fromAddress;
 	}
 	
 	public int fetchBlockTime(int id, Connection connection) throws SQLException{

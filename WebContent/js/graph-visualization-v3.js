@@ -9,7 +9,7 @@ var electric_factor = 7;
 var forces_factor = 0.5;
 
 var alpha = 0.1;
-var beta = 0.7;
+var beta = 10;
 var magnetic_factor = 10;
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
@@ -24,6 +24,8 @@ var edges = [];
 var transaction;
 
 var historyGraph = [];
+
+var idNYR = -1;
 
 //Finestra temporale di 5 secondi
 var temporal_window = 5000;
@@ -306,11 +308,13 @@ function draw() {
 
 	//disegno i links
 	edges.map(function(d) {
-
-
+		var f = d;
 		svg.insert("line","g").attr("x1", d.source.x).attr("y1", d.source.y)
+		.on("mouseover",function(d){return mouseoverline(f);})
+		.on("mouseout",function(d){return mouseoutline(f);})
 		.attr("x2", d.target.x)
-		.attr("y2", d.target.y).attr("stroke-width", 2)
+		.attr("y2", d.target.y)
+		.attr("stroke-width", 2)
 		.attr("stroke", "black")
 		.attr("marker-end", "url(#end)");
 
@@ -318,18 +322,70 @@ function draw() {
 }
 
 function loadJson(transaction) {
+	console.log(transaction);
 	var node = transaction;
 	node.date = new Date(node.date);
 
 	var parents = node.parents;
 	var children = node.children;
+	var fromAddress = node.fromAddress;
+	var fromAddress2Values = node.fromAddress2Values;
+	var toAddress = node.toAddress;
+	var toAddress2Values = node.toAddress2Values;
+	
+	//merge per mappe
+	Object.extend = function(destination, source) {
+	    for (var property in source) {
+	        if (source.hasOwnProperty(property)) {
+	            destination[property] = source[property];
+	        }
+	    }
+	    return destination;
+	};
+	
+	//merge per array
+	Array.prototype.unique = function() {
+	    var a = this.concat();
+	    for(var i=0; i<a.length; ++i) {
+	        for(var j=i+1; j<a.length; ++j) {
+	            if(a[i] === a[j])
+	                a.splice(j--, 1);
+	        }
+	    }
 
+	    return a;
+	};
+	
 	if (!isInArray(node, nodes)) {
 		nodes.push(node);
 	}else{
 		node = find_node_by_id(node.id);
+		
+		//TODO fix load parents
 		node.parents = parents;
 		node.children = children;
+		
+		if(node.fromAddress!=null){
+			node.fromAddress.concat(fromAddress).unique();
+		}else{
+			node.fromAddress = fromAddress;
+		}
+		if(node.toAddress!=null){
+			node.toAddress.concat(toAddress).unique();
+		}else{
+			node.toAddress = toAddress;
+		}
+		if(node.fromAddress2Values!=null){
+			node.fromAddress2Values = Object.extend(node.fromAddress2Values,fromAddress2Values);
+		}else{
+			node.fromAddress2Values = fromAddress2Values;
+		}
+		if(node.toAddress2Values!=null){
+			node.toAddress2Values = Object.extend(node.toAddress2Values,toAddress2Values);
+		}else{
+			node.toAddress2Values = toAddress2Values;
+		}
+		
 	}
 
 
@@ -425,8 +481,49 @@ function mouseover(d) {
 	}
 }
 
-function mouseout(d) {
+function mouseoverline(d){
+	var source = d.source;
+	var target = d.target;
+	var sourceId = source.id;
+	var targetId = target.id;
+	
+	var address = null;
+	var amount = null; 
+	console.log(d);
+	try {
+		address = source.toAddress[targetId];
+		amount = target.fromAddress2Values[sourceId];
+	} catch (e) {
+		amount = source.toAddress2Values[targetId];
+		address = target.fromAddress[sourceId];
+	}
+	
+	if(address != null && amount != null) {
+		d3.select("#tooltip")
+		.style("left", function(){
+			var position = source.x - 400;
+			if(source.x + 400 >= width)
+				position = source.x - 800;
+			if(position < 0)
+				position = 0;
+			return position + "px";
+		})
+		.style("top", 0 + "px");
+	
+		d3.select("#txhash")
+		.html("<p><strong>To " + address + "</strong></p>");
+	
+		d3.select("#value")
+		.style("font-size","11px")
+		.html("Value: "+ amount + "<br/>"
+		);
+		
+		d3.select("#tooltip").classed("hidden", false);
+	}
+}
 
+function mouseout(d) {
+	if(d.id != null){
 	d3.select(this).select(".circle")
 	.style("stroke", "black")
 	.style("stroke-width", 2);
@@ -441,6 +538,11 @@ function mouseout(d) {
 		}
 
 	});
+	d3.select("#tooltip").classed("hidden", true);
+	}
+}
+
+function mouseoutline(d){
 	d3.select("#tooltip").classed("hidden", true);
 }
 

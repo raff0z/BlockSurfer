@@ -12,8 +12,8 @@ public class Transaction {
     private Date date;
     private double totalIn;
     private double totalOut;
-    private List<String> toAddress;
-    private List<String> fromAddress;
+    private Map<Integer,String> toAddress;
+    private Map<Integer,String> fromAddress;
     private boolean notYetRedeemed = false;
     private Map<Integer, Float> fromAddress2Values;
     private Map<Integer, Float> toAddress2Values;
@@ -66,22 +66,6 @@ public class Transaction {
 	this.notYetRedeemed = notYetRedeemed;
     }
 
-    public List<String> getToAddress() {
-	return toAddress;
-    }
-
-    public void setToAddress(List<String> toAddress) {
-	this.toAddress = toAddress;
-    }
-
-    public List<String> getFromAddress() {
-	return fromAddress;
-    }
-
-    public void setFromAddress(List<String> fromAddress) {
-	this.fromAddress = fromAddress;
-    }
-
     public Map<Integer, Float> getFromAddress2Values() {
         return fromAddress2Values;
     }
@@ -112,6 +96,18 @@ public class Transaction {
 
     public void setTotalOut(double totalOut) {
         this.totalOut = totalOut;
+    }
+
+    public void setFromAddress(Map<Integer, String> fromAddress) {
+        this.fromAddress = fromAddress;
+    }
+
+    public Map<Integer, String> getFromAddress() {
+        return fromAddress;
+    }
+
+    public void setToAddress(Map<Integer, String> toAddress) {
+        this.toAddress = toAddress;
     }
 
 }
