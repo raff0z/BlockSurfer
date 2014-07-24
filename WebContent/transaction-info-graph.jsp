@@ -24,7 +24,7 @@
 		
 		<div class="svg">
 		  	<span id="revert"><button onclick="revert()">Revert</button></span>
-			<script src="js/graph-visualization-v2.js"></script>
+			<script src="js/graph-visualization-v3.js"></script>
 			<script type="text/javascript">
 				init(<%out.print(transaction.getId());%>);
 			</script>
