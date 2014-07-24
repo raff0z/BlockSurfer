@@ -228,26 +228,6 @@ function amount2radius(amount) {
 	}
 }
 
-
-//build the arrow.
-function build_arrow(edge) {
-	svg.append("svg:defs").selectAll("marker")
-	.data(["end"])      // Different link/path types can be defined here
-	.enter().append("svg:marker")    // This section adds in the arrows
-	.attr("id", String)
-	.attr("viewBox", "0 -5 10 10")
-	.attr("refX", 20+amount2radius(edge.target.totalIn))
-	.attr("refY", 0)
-	.attr("markerWidth", 6)
-	.attr("markerHeight", 6)
-	.attr("orient", "auto")
-	.append("svg:path")
-	.attr("d", "M0,-5L10,0L0,5");
-
-	return "url(#end)";
-}
-
-
 //---------------------------------- FUNCTIONS
 //----------------------------------
 
@@ -271,7 +251,9 @@ function update() {
 	loadJson(transaction);
 
 	spring_embedding();
-
+	
+	fit_graph();
+	
 	draw();
 }
 
@@ -285,7 +267,7 @@ function draw() {
 	svg = svg.append('g');
 
 	var nodesSvg = svg.selectAll(".nodes").data(nodes).enter().append("g");
-
+	
 	nodesSvg.append("circle").attr("class", "circle")
 	.on("mouseover",mouseover)
 	.on("mouseout", mouseout)
@@ -761,4 +743,28 @@ function contains_edge_by_nodes(node1, node2) {
 	.some(function(element, index, array) {
 		return (element.source.id == node2.id && element.target.id == node1.id);
 	});
+}
+
+function fit_graph() {
+	
+	var min_x = nodes[0].x;
+	var min_y = nodes[0].y;
+	
+	nodes.forEach(function(d) {
+		if(d.x < min_x) {
+			min_x = d.x;
+		}
+		
+		if(d.y < min_y) {
+			min_y = d.y;
+		}
+	});
+	
+	nodes.forEach(function(d) {
+		d.x -= min_x - 25;
+		
+		d.y -= min_y - 25;
+	});
+	
+	
 }
