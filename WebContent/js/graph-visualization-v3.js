@@ -3,14 +3,14 @@ var height = window.innerHeight;
 
 var iterator_number = 200;
 
-var elastic_factor = 7;
-var spring_length = 100;
-var electric_factor = 7;
-var forces_factor = 0.5;
+var elastic_factor = 10; //10
+var spring_length = 100; //100
+var electric_factor = 10000; //10000
+var forces_factor = 1; //1
 
-var alpha = 0.1;
-var beta = 10;
-var magnetic_factor = 10;
+var alpha = 0.1; //0.1
+var beta = 5; //10
+var magnetic_factor = 10; //???
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
 		height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);
@@ -253,9 +253,9 @@ function update() {
 	loadJson(transaction);
 
 	spring_embedding();
-	
+
 	fit_graph();
-	
+
 	draw();
 }
 
@@ -266,59 +266,59 @@ function draw() {
 	svg = d3.select("body").append("svg").attr("width", width).attr("height",
 			height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);;
 
-	svg = svg.append('g');
+			svg = svg.append('g');
 
-	var nodesSvg = svg.selectAll(".nodes").data(nodes).enter().append("g");
-	
-	nodesSvg.append("circle").attr("class", "circle")
-	.on("mouseover",mouseover)
-	.on("mouseout", mouseout)
-	.attr("r", function(d){
-		return amount2radius(d.totalIn);
-	})
-	.attr("cx", function(d) {return d.x;})
-	.attr("cy", function(d) {return d.y;}).attr("fill", function(d){
-		return (d.notYetRedeemed) ? "grey" : "#354F00";
-	}).style("stroke", function(d){
-		return "black";})
-		.style("stroke-width", function(d){
-			return 2;})
-			.on("dblclick", function(d){
-				click(d);
+			var nodesSvg = svg.selectAll(".nodes").data(nodes).enter().append("g");
+
+			nodesSvg.append("circle").attr("class", "circle")
+			.on("mouseover",mouseover)
+			.on("mouseout", mouseout)
+			.attr("r", function(d){
+				return amount2radius(d.totalIn);
+			})
+			.attr("cx", function(d) {return d.x;})
+			.attr("cy", function(d) {return d.y;}).attr("fill", function(d){
+				return (d.notYetRedeemed) ? "grey" : "#354F00";
+			}).style("stroke", function(d){
+				return "black";})
+				.style("stroke-width", function(d){
+					return 2;})
+					.on("dblclick", function(d){
+						click(d);
+					});
+
+			nodesSvg.append("text").text(function(d) {return d.notYetRedeemed ? "Not yet redeemed" : "" + d.id;})
+			.attr("x",function(d){return d.x-15;})
+			.attr("y",function(d){return d.isDummy ? null : d.y +amount2radius(d.totalIn) + 11;});
+
+
+			svg.append("svg:defs").selectAll("marker")
+			.data(["end"])      // Different link/path types can be defined here
+			.enter().append("svg:marker")    // This section adds in the arrows
+			.attr("id", String)
+			.attr("viewBox", "0 -5 10 10")
+			.attr("refX", 20)
+			.attr("refY", 0)
+			.attr("markerWidth", 6)
+			.attr("markerHeight", 6)
+			.attr("orient", "auto")
+			.append("svg:path")
+			.attr("d", "M0,-5L10,0L0,5");
+
+
+			//disegno i links
+			edges.map(function(d) {
+				var f = d;
+				svg.insert("line","g").attr("x1", d.source.x).attr("y1", d.source.y)
+				.on("mouseover",function(d){return mouseoverline(f);})
+				.on("mouseout",function(d){return mouseoutline(f);})
+				.attr("x2", d.target.x)
+				.attr("y2", d.target.y)
+				.attr("stroke-width", 2)
+				.attr("stroke", "black")
+				.attr("marker-end", "url(#end)");
+
 			});
-
-	nodesSvg.append("text").text(function(d) {return d.notYetRedeemed ? "Not yet redeemed" : "" + d.id;})
-	.attr("x",function(d){return d.x-15;})
-	.attr("y",function(d){return d.isDummy ? null : d.y +amount2radius(d.totalIn) + 11;});
-
-
-	svg.append("svg:defs").selectAll("marker")
-	.data(["end"])      // Different link/path types can be defined here
-	.enter().append("svg:marker")    // This section adds in the arrows
-	.attr("id", String)
-	.attr("viewBox", "0 -5 10 10")
-	.attr("refX", 20)
-	.attr("refY", 0)
-	.attr("markerWidth", 6)
-	.attr("markerHeight", 6)
-	.attr("orient", "auto")
-	.append("svg:path")
-	.attr("d", "M0,-5L10,0L0,5");
-
-
-	//disegno i links
-	edges.map(function(d) {
-		var f = d;
-		svg.insert("line","g").attr("x1", d.source.x).attr("y1", d.source.y)
-		.on("mouseover",function(d){return mouseoverline(f);})
-		.on("mouseout",function(d){return mouseoutline(f);})
-		.attr("x2", d.target.x)
-		.attr("y2", d.target.y)
-		.attr("stroke-width", 2)
-		.attr("stroke", "black")
-		.attr("marker-end", "url(#end)");
-
-	});
 }
 
 function loadJson(transaction) {
@@ -332,39 +332,39 @@ function loadJson(transaction) {
 	var fromAddress2Values = node.fromAddress2Values;
 	var toAddress = node.toAddress;
 	var toAddress2Values = node.toAddress2Values;
-	
+
 	//merge per mappe
 	Object.extend = function(destination, source) {
-	    for (var property in source) {
-	        if (source.hasOwnProperty(property)) {
-	            destination[property] = source[property];
-	        }
-	    }
-	    return destination;
+		for (var property in source) {
+			if (source.hasOwnProperty(property)) {
+				destination[property] = source[property];
+			}
+		}
+		return destination;
 	};
-	
+
 	//merge per array
 	Array.prototype.unique = function() {
-	    var a = this.concat();
-	    for(var i=0; i<a.length; ++i) {
-	        for(var j=i+1; j<a.length; ++j) {
-	            if(a[i] === a[j])
-	                a.splice(j--, 1);
-	        }
-	    }
+		var a = this.concat();
+		for(var i=0; i<a.length; ++i) {
+			for(var j=i+1; j<a.length; ++j) {
+				if(a[i] === a[j])
+					a.splice(j--, 1);
+			}
+		}
 
-	    return a;
+		return a;
 	};
-	
+
 	if (!isInArray(node, nodes)) {
 		nodes.push(node);
 	}else{
 		node = find_node_by_id(node.id);
-		
+
 		//TODO fix load parents
 		node.parents = parents;
 		node.children = children;
-		
+
 		if(node.fromAddress!=null){
 			node.fromAddress.concat(fromAddress).unique();
 		}else{
@@ -385,7 +385,7 @@ function loadJson(transaction) {
 		}else{
 			node.toAddress2Values = toAddress2Values;
 		}
-		
+
 	}
 
 
@@ -486,7 +486,7 @@ function mouseoverline(d){
 	var target = d.target;
 	var sourceId = source.id;
 	var targetId = target.id;
-	
+
 	var address = null;
 	var amount = null; 
 	console.log(d);
@@ -497,7 +497,7 @@ function mouseoverline(d){
 		amount = source.toAddress2Values[targetId];
 		address = target.fromAddress[sourceId];
 	}
-	
+
 	if(address != null && amount != null) {
 		d3.select("#tooltip")
 		.style("left", function(){
@@ -509,36 +509,36 @@ function mouseoverline(d){
 			return position + "px";
 		})
 		.style("top", 0 + "px");
-	
+
 		d3.select("#txhash")
 		.html("<p><strong>To " + address + "</strong></p>");
-	
+
 		d3.select("#value")
 		.style("font-size","11px")
 		.html("Value: "+ amount + "<br/>"
 		);
-		
+
 		d3.select("#tooltip").classed("hidden", false);
 	}
 }
 
 function mouseout(d) {
 	if(d.id != null){
-	d3.select(this).select(".circle")
-	.style("stroke", "black")
-	.style("stroke-width", 2);
+		d3.select(this).select(".circle")
+		.style("stroke", "black")
+		.style("stroke-width", 2);
 
-	d3.selectAll("circle").each(function(elem){
-		if(!elem.isDummy) {
-			if(!elem.notYetRedeemed) {
-				d3.select(this).attr("fill", "#354F00");
-			} else {
-				d3.select(this).attr("fill", "grey");
+		d3.selectAll("circle").each(function(elem){
+			if(!elem.isDummy) {
+				if(!elem.notYetRedeemed) {
+					d3.select(this).attr("fill", "#354F00");
+				} else {
+					d3.select(this).attr("fill", "grey");
+				}
 			}
-		}
 
-	});
-	d3.select("#tooltip").classed("hidden", true);
+		});
+		d3.select("#tooltip").classed("hidden", true);
 	}
 }
 
@@ -555,7 +555,7 @@ function revert(){
 
 		var nodeClicked = find_node_by_id(state.nodeId);
 		nodeClicked.isClicked = false;
-		
+
 		spring_embedding();
 		draw();
 	}
@@ -646,7 +646,6 @@ function calculate_force_x(node1, node2) {
 
 	if(d == 0) {
 		node1.x += 50;
-		adjust_coordinate(node1);
 		return 0;
 	}
 
@@ -657,7 +656,7 @@ function calculate_force_x(node1, node2) {
 
 
 	//electric_force = (ke/Math.pow(d,2))*((node1.x - node2.x)/d);
-	electric_force = (electric_factor/Math.sqrt(d))*((node1.x - node2.x)/d);
+	electric_force = (electric_factor/Math.pow(d,2))*((node1.x - node2.x)/d);
 	// console.log("hook/elec "+node1.id+"-> "+node2.id);
 	// console.log(hook_force);
 	// console.log(electric_force);
@@ -671,15 +670,14 @@ function calculate_force_y(node1, node2) {
 
 	if(d == 0) {
 		node1.y += 50;
-		adjust_coordinate(node1);
 		return 0;
 	}
 
-	if(contains_edge_by_nodes(node1, node2)) {
+	if(contains_edge_by_nodes(node2, node1)) {
 		hook_force = elastic_factor*Math.log(d/spring_length)*(node2.y - node1.y)/d;
 	}
 
-	electric_force = (electric_factor/Math.sqrt(d))*((node1.y - node2.y)/d);
+	electric_force = (electric_factor/Math.pow(d,2))*((node1.y - node2.y)/d);
 
 	return electric_force + hook_force;
 }
@@ -702,29 +700,25 @@ function magnetic_force(edge) {
 	// console.log("force: "+magnetic_force);
 	// console.log("magn "+edge.source.id+"-> "+edge.target.id);
 	// console.log(magnetic_force);
-	var force_x = magnetic_factor*magnetic_force*((edge.source.x - edge.target.x)/d);
+	var force_x = Math.abs(magnetic_factor*magnetic_force*((edge.target.x - edge.source.x)/d));
 	// console.log(force_x);
 
-	if(force_x<0) {
-		edge.source.force_x += force_x;
-		edge.target.force_x -= force_x;
-	}
-	else {
-		edge.source.force_x -= force_x;
-		edge.target.force_x += force_x;
-	}
 
-	var force_y = magnetic_factor*magnetic_force*((edge.source.y - edge.target.y)/d)/height;
-	//console.log(force_y);
+	edge.source.force_x -= force_x;
+	edge.target.force_x += force_x;
 
-	if(force_y < 0) {
-		edge.source.force_y += force_y;
-		edge.target.force_y -= force_y;
-	}
-	else {
-		edge.source.force_y -= force_y;
-		edge.target.force_y += force_y;
-	}
+
+//	var force_y = magnetic_factor*magnetic_force*((edge.source.y - edge.target.y)/d)/height;
+//	//console.log(force_y);
+
+//	if(force_y < 0) {
+//	edge.source.force_y += force_y;
+//	edge.target.force_y -= force_y;
+//	}
+//	else {
+//	edge.source.force_y -= force_y;
+//	edge.target.force_y += force_y;
+//	}
 
 
 }
@@ -843,30 +837,30 @@ function contains_edge_by_nodes(node1, node2) {
 
 	return edges
 	.some(function(element, index, array) {
-		return (element.source.id == node2.id && element.target.id == node1.id);
+		return (element.source.id == node1.id && element.target.id == node2.id) || (element.source.id == node2.id && element.target.id == node1.id);
 	});
 }
 
 function fit_graph() {
-	
+
 	var min_x = nodes[0].x;
 	var min_y = nodes[0].y;
-	
+
 	nodes.forEach(function(d) {
 		if(d.x < min_x) {
 			min_x = d.x;
 		}
-		
+
 		if(d.y < min_y) {
 			min_y = d.y;
 		}
 	});
-	
+
 	nodes.forEach(function(d) {
 		d.x -= min_x - 25;
-		
+
 		d.y -= min_y - 35;
 	});
-	
-	
+
+
 }
