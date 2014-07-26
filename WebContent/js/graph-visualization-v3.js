@@ -651,7 +651,8 @@ function calculate_force_x(node1, node2) {
 
 	if(contains_edge_by_nodes(node1, node2)) {
 		//hook_force = kh*(d-l)*(node2.x - node1.x)/d;
-		hook_force = elastic_factor*Math.log(d/spring_length)*(node2.x - node1.x)/d;
+		var d12 = d*(Math.abs(node2.layer - node1.layer)); 
+		hook_force = elastic_factor*Math.log(d12/spring_length)*(node2.x - node1.x)/d;
 	}
 
 
@@ -674,7 +675,8 @@ function calculate_force_y(node1, node2) {
 	}
 
 	if(contains_edge_by_nodes(node2, node1)) {
-		hook_force = elastic_factor*Math.log(d/spring_length)*(node2.y - node1.y)/d;
+		var d12 = d*(Math.abs(node2.layer - node1.layer)); 
+		hook_force = elastic_factor*Math.log(d12/spring_length)*(node2.y - node1.y)/d;
 	}
 
 	electric_force = (electric_factor/Math.pow(d,2))*((node1.y - node2.y)/d);
