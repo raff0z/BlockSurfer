@@ -5,12 +5,12 @@ var iterator_number = 200;
 
 var elastic_factor = 10; //10
 var spring_length = 100; //100
-var electric_factor = 10000; //10000
+var electric_factor = 20000; //20000
 var forces_factor = 1; //1
 
-var alpha = 0.1; //0.1
-var beta = 5; //10
-var magnetic_factor = 10; //???
+var alpha = 0; //0
+var beta = 2; //2
+var magnetic_factor = 10; //10
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
 		height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);
@@ -322,7 +322,7 @@ function draw() {
 }
 
 function loadJson(transaction) {
-	console.log(transaction);
+	// console.log(transaction);
 	var node = transaction;
 	node.date = new Date(node.date);
 
@@ -489,7 +489,7 @@ function mouseoverline(d){
 
 	var address = null;
 	var amount = null; 
-	console.log(d);
+	// console.log(d);
 	try {
 		address = source.toAddress[targetId];
 		amount = target.fromAddress2Values[sourceId];
@@ -651,13 +651,15 @@ function calculate_force_x(node1, node2) {
 
 	if(contains_edge_by_nodes(node1, node2)) {
 		//hook_force = kh*(d-l)*(node2.x - node1.x)/d;
-		var d12 = d*(Math.abs(node2.layer - node1.layer)); 
-		hook_force = elastic_factor*Math.log(d12/spring_length)*(node2.x - node1.x)/d;
+		var length = spring_length*(Math.abs(node2.layer - node1.layer)); 
+		hook_force = elastic_factor*Math.log(d/spring_length)*(node2.x - node1.x)/d;
+		//console.log("hook: "+node1.id+"->"+node2.id+" = "+hook_force);
 	}
 
 
 	//electric_force = (ke/Math.pow(d,2))*((node1.x - node2.x)/d);
 	electric_force = (electric_factor/Math.pow(d,2))*((node1.x - node2.x)/d);
+	// console.log("electric: "+electric_force);
 	// console.log("hook/elec "+node1.id+"-> "+node2.id);
 	// console.log(hook_force);
 	// console.log(electric_force);
@@ -675,8 +677,8 @@ function calculate_force_y(node1, node2) {
 	}
 
 	if(contains_edge_by_nodes(node2, node1)) {
-		var d12 = d*(Math.abs(node2.layer - node1.layer)); 
-		hook_force = elastic_factor*Math.log(d12/spring_length)*(node2.y - node1.y)/d;
+		var length = spring_length*(Math.abs(node2.layer - node1.layer)); 
+		hook_force = elastic_factor*Math.log(d/spring_length)*(node2.y - node1.y)/d;
 	}
 
 	electric_force = (electric_factor/Math.pow(d,2))*((node1.y - node2.y)/d);
@@ -701,18 +703,17 @@ function magnetic_force(edge) {
 	// console.log("th: "+th);
 	// console.log("force: "+magnetic_force);
 	// console.log("magn "+edge.source.id+"-> "+edge.target.id);
-	// console.log(magnetic_force);
-	var force_x = Math.abs(magnetic_factor*magnetic_force*((edge.target.x - edge.source.x)/d));
-	// console.log(force_x);
+	//console.log("magnetic: "+edge.source.id+"->"+edge.target.id+" = "+magnetic_force);
+	var force_x = Math.abs(magnetic_factor*magnetic_force);	// console.log(force_x);
 
 
 	edge.source.force_x -= force_x;
 	edge.target.force_x += force_x;
 
 
-//	var force_y = magnetic_factor*magnetic_force*((edge.source.y - edge.target.y)/d)/height;
+//	var force_y = magnetic_factor*magnetic_force*((edge.source.y - edge.target.y)/d);
 //	//console.log(force_y);
-
+//
 //	if(force_y < 0) {
 //	edge.source.force_y += force_y;
 //	edge.target.force_y -= force_y;
@@ -728,21 +729,14 @@ function magnetic_force(edge) {
 function theta(node1, node2) {
 	var m = (node2.y -node1.y)/(node2.x -node1.x);
 	var theta = Math.atan(m);
-
-	if((node1.x > node2.x) && (node1.y < node2.y)) {
+	
+	
+	if((node1.x > node2.x)) {
 		return Math.PI - Math.abs(theta);
 	}
 
-	if((node1.x > node2.x) && (node1.y > node2.y)){
-		return Math.PI - Math.abs(theta);
-	}
 
-	if((node1.x < node2.x) && (node1.y > node2.y)){
-		return Math.abs(theta);
-	} 
-
-
-	return theta;
+	return Math.abs(theta);
 }
 
 
