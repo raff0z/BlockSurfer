@@ -260,13 +260,13 @@ function update() {
 }
 
 function draw() {
+	
+		d3.select("svg").remove();
 
-	d3.select("svg").remove();
-
-	svg = d3.select("body").append("svg").attr("width", width).attr("height",
+		svg = d3.select("body").append("svg").attr("width", width).attr("height",
 			height).call(d3.behavior.zoom().on("zoom", zoomed)).on("dblclick.zoom",null);;
 
-			svg = svg.append('g');
+		svg = svg.append('g');
 
 			var nodesSvg = svg.selectAll(".nodes").data(nodes).enter().append("g");
 
@@ -368,12 +368,12 @@ function loadJson(transaction) {
 		if(node.fromAddress!=null){
 			node.fromAddress.concat(fromAddress).unique();
 		}else{
-			node.fromAddress = fromAddress;
+			node.fromAddress = [fromAddress];
 		}
 		if(node.toAddress!=null){
 			node.toAddress.concat(toAddress).unique();
 		}else{
-			node.toAddress = toAddress;
+			node.toAddress = [toAddress];
 		}
 		if(node.fromAddress2Values!=null){
 			node.fromAddress2Values = Object.extend(node.fromAddress2Values,fromAddress2Values);
@@ -545,18 +545,21 @@ function mouseout(d) {
 function mouseoutline(d){
 	d3.select("#tooltip").classed("hidden", true);
 }
-
 function revert(){
 	if(historyGraph.length > 1){
 		var state = historyGraph.pop();
 
 		nodes = state.nodes.slice(0);
 		edges = state.edges.slice(0);
-
+		
 		var nodeClicked = find_node_by_id(state.nodeId);
+		
 		nodeClicked.isClicked = false;
-
+		
 		spring_embedding();
+		
+		fit_graph();
+
 		draw();
 	}
 }
